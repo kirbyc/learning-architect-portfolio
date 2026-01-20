@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIRBY CRIDER: Learning Architect of the Anthropocene</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --green: #39ff14;
+            --amber: #ffbf00;
+            --cyan: #00ffff;
+            --magenta: #ff00ff;
+            --coral: #ff6b6b;
+            --bg-dark: #0a0a0f;
+            --bg-panel: #12121a;
+        }
+        
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--green);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        /* CRT flicker */
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            50% { opacity: 1; }
+            100% { opacity: 0.98; }
+        }
+        
+        #game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            animation: flicker 0.1s infinite;
+        }
+        
+        #header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--green);
+            margin-bottom: 20px;
+        }
+        
+        #header h1 {
+            font-family: 'VT323', monospace;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            color: var(--cyan);
+            text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
+            letter-spacing: 3px;
+        }
+        
+        #header .subtitle {
+            font-size: 0.9rem;
+            color: var(--amber);
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+        
+        #status-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 15px;
+            background: var(--bg-panel);
+            border: 1px solid var(--green);
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border-left: 3px solid var(--cyan);
+        }
+        
+        .stat-label { color: var(--amber); }
+        .stat-value { color: var(--green); }
+        
+        #main-display {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            #main-display {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+        
+        #narrative-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--green);
+            padding: 20px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        #narrative-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #narrative-panel::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        
+        #narrative-panel::-webkit-scrollbar-thumb {
+            background: var(--green);
+        }
+        
+        .narrative-text {
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        
+        .narrative-text.system {
+            color: var(--amber);
+            font-style: italic;
+        }
+        
+        .narrative-text.alert {
+            color: var(--coral);
+            border-left: 3px solid var(--coral);
+            padding-left: 10px;
+        }
+        
+        .narrative-text.success {
+            color: var(--cyan);
+            border-left: 3px solid var(--cyan);
+            padding-left: 10px;
+        }
+        
+        .highlight {
+            color: var(--magenta);
+            font-weight: bold;
+        }
+        
+        .skill-tag {
+            display: inline-block;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--cyan);
+            padding: 2px 8px;
+            margin: 2px;
+            font-size: 0.75rem;
+            color: var(--cyan);
+        }
+        
+        #side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel-section {
+            background: var(--bg-panel);
+            border: 1px solid var(--green);
+            padding: 15px;
+        }
+        
+        .panel-title {
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: var(--amber);
+            border-bottom: 1px solid var(--amber);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        
+        #inventory-list, #mission-log {
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+        
+        .inventory-item {
+            padding: 5px 0;
+            border-bottom: 1px dashed rgba(57, 255, 20, 0.3);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .inventory-item:hover {
+            color: var(--cyan);
+        }
+        
+        #choices-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--amber);
+        }
+        
+        #choices-panel h3 {
+            font-family: 'VT323', monospace;
+            color: var(--amber);
+            margin-bottom: 15px;
+        }
+        
+        .choice-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: transparent;
+            border: 1px solid var(--green);
+            color: var(--green);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .choice-btn:hover {
+            background: rgba(57, 255, 20, 0.1);
+            border-color: var(--cyan);
+            color: var(--cyan);
+            transform: translateX(5px);
+        }
+        
+        .choice-btn .key {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background: var(--green);
+            color: var(--bg-dark);
+            text-align: center;
+            line-height: 25px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .choice-btn:hover .key {
+            background: var(--cyan);
+        }
+        
+        /* Typing animation */
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background: var(--green);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+        
+        /* Location visual */
+        #location-visual {
+            width: 100%;
+            height: 150px;
+            background: var(--bg-panel);
+            border: 1px solid var(--green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .ascii-art {
+            font-family: 'VT323', monospace;
+            font-size: clamp(0.5rem, 1.5vw, 0.8rem);
+            white-space: pre;
+            color: var(--green);
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            margin: 10px 0;
+        }
+        
+        .progress-label {
+            font-size: 0.75rem;
+            color: var(--amber);
+            margin-bottom: 5px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(57, 255, 20, 0.2);
+            border: 1px solid var(--green);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--green);
+            transition: width 0.5s ease;
+        }
+        
+        /* Modal */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #modal-content {
+            background: var(--bg-panel);
+            border: 2px solid var(--cyan);
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin: 20px;
+        }
+        
+        #modal-content h2 {
+            font-family: 'VT323', monospace;
+            color: var(--cyan);
+            margin-bottom: 15px;
+        }
+        
+        #modal-content p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .close-modal {
+            display: block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: var(--cyan);
+            color: var(--bg-dark);
+            border: none;
+            font-family: 'Space Mono', monospace;
+            cursor: pointer;
+        }
+        
+        /* Contact footer */
+        #contact-bar {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--magenta);
+            text-align: center;
+        }
+        
+        #contact-bar a {
+            color: var(--magenta);
+            margin: 0 15px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        #contact-bar a:hover {
+            color: var(--cyan);
+        }
+        
+        /* Glitch effect for titles */
+        @keyframes glitch {
+            0% { text-shadow: 2px 0 var(--magenta), -2px 0 var(--cyan); }
+            25% { text-shadow: -2px 0 var(--magenta), 2px 0 var(--cyan); }
+            50% { text-shadow: 2px 0 var(--cyan), -2px 0 var(--magenta); }
+            75% { text-shadow: -2px 0 var(--cyan), 2px 0 var(--magenta); }
+            100% { text-shadow: 2px 0 var(--magenta), -2px 0 var(--cyan); }
+        }
+        
+        .glitch {
+            animation: glitch 0.3s infinite;
+        }
+        
+        /* Weather widget */
+        #weather-widget {
+            font-size: 0.75rem;
+            padding: 10px;
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 3px solid var(--coral);
+            margin-bottom: 10px;
+        }
+        
+        /* Start screen */
+        #start-screen {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        
+        #start-screen h1 {
+            font-family: 'VT323', monospace;
+            font-size: clamp(2rem, 8vw, 4rem);
+            color: var(--cyan);
+            text-shadow: 0 0 20px var(--cyan);
+            margin-bottom: 20px;
+        }
+        
+        #start-screen .tagline {
+            font-size: 1.1rem;
+            color: var(--amber);
+            margin-bottom: 30px;
+        }
+        
+        #start-btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: transparent;
+            border: 2px solid var(--green);
+            color: var(--green);
+            font-family: 'VT323', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #start-btn:hover {
+            background: var(--green);
+            color: var(--bg-dark);
+            transform: scale(1.05);
+        }
+        
+        .hidden { display: none !important; }
+        
+        /* Achievement popup */
+        #achievement {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-panel);
+            border: 2px solid var(--amber);
+            padding: 15px 20px;
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+            z-index: 1001;
+        }
+        
+        #achievement.show {
+            transform: translateX(0);
+        }
+        
+        #achievement .ach-title {
+            color: var(--amber);
+            font-family: 'VT323', monospace;
+            font-size: 1.1rem;
+        }
+        
+        #achievement .ach-desc {
+            font-size: 0.8rem;
+            color: var(--green);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <div class="ascii-art" style="color: var(--cyan); margin-bottom: 20px;">
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║  ██╗  ██╗██╗██████╗ ██████╗ ██╗   ██╗     ██████╗            ║
+    ║  ██║ ██╔╝██║██╔══██╗██╔══██╗╚██╗ ██╔╝    ██╔════╝            ║
+    ║  █████╔╝ ██║██████╔╝██████╔╝ ╚████╔╝     ██║                 ║
+    ║  ██╔═██╗ ██║██╔══██╗██╔══██╗  ╚██╔╝      ██║                 ║
+    ║  ██║  ██╗██║██║  ██║██████╔╝   ██║       ╚██████╗            ║
+    ║  ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝    ╚═╝        ╚═════╝            ║
+    ╚═══════════════════════════════════════════════════════════════╝
+            </div>
+            <h1 class="glitch">LEARNING ARCHITECT<br>OF THE ANTHROPOCENE</h1>
+            <p class="tagline">A Text Adventure Through a Climate-Changed Future</p>
+            <p style="color: var(--green); margin-bottom: 30px; font-size: 0.9rem;">
+                The year is 2047. The world survived—barely.<br>
+                Now it needs people who can help it learn, adapt, and rebuild.<br>
+                People like <span class="highlight">Kirby Crider</span>.
+            </p>
+            <button id="start-btn">[ INITIALIZE SIMULATION ]</button>
+            <p style="margin-top: 30px; font-size: 0.75rem; color: var(--amber);">
+                An interactive portfolio experience<br>
+                kirby.crider@gmail.com | 919-357-1797
+            </p>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="game-screen" class="hidden">
+            <div id="header">
+                <h1>KIRBY CRIDER: LEARNING ARCHITECT</h1>
+                <div class="subtitle">Global Capacity Coordination Network | Year 2047</div>
+            </div>
+            
+            <div id="status-bar">
+                <div class="stat">
+                    <span class="stat-label">LOCATION:</span>
+                    <span class="stat-value" id="current-location">Charlottesville Hub</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">YEAR:</span>
+                    <span class="stat-value" id="current-year">2047</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">TRUST:</span>
+                    <span class="stat-value" id="trust-level">●●●○○</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">IMPACT:</span>
+                    <span class="stat-value" id="impact-score">0</span>
+                </div>
+            </div>
+            
+            <div id="location-visual">
+                <pre class="ascii-art" id="ascii-display"></pre>
+            </div>
+            
+            <div id="main-display">
+                <div id="narrative-column">
+                    <div id="narrative-panel"></div>
+                    <div id="choices-panel">
+                        <h3>> AVAILABLE ACTIONS</h3>
+                        <div id="choices-container"></div>
+                    </div>
+                </div>
+                
+                <div id="side-panel">
+                    <div class="panel-section">
+                        <div class="panel-title">// WEATHER ADVISORY</div>
+                        <div id="weather-widget">
+                            ATMOSPHERIC CO₂: 485ppm<br>
+                            TEMP ANOMALY: +2.1°C<br>
+                            STATUS: Adaptation protocols active
+                        </div>
+                    </div>
+                    
+                    <div class="panel-section">
+                        <div class="panel-title">// CAPABILITIES LOADED</div>
+                        <div id="inventory-list"></div>
+                    </div>
+                    
+                    <div class="panel-section">
+                        <div class="panel-title">// MISSION LOG</div>
+                        <div id="mission-log"></div>
+                        <div class="progress-container">
+                            <div class="progress-label">Portfolio Discovery: <span id="discovery-pct">0</span>%</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="discovery-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="contact-bar">
+                <span style="color: var(--amber);">// DIRECT UPLINK //</span><br><br>
+                <a href="mailto:kirby.crider@gmail.com">📧 kirby.crider@gmail.com</a>
+                <a href="tel:919-357-1797">📞 919-357-1797</a>
+                <a href="https://linkedin.com/in/kirbycrider" target="_blank">💼 LinkedIn</a>
+                <a href="https://kirbyc.carrd.co" target="_blank">🌐 Portfolio</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div id="modal-overlay">
+        <div id="modal-content">
+            <h2 id="modal-title"></h2>
+            <div id="modal-body"></div>
+            <button class="close-modal" onclick="closeModal()">[ CLOSE TRANSMISSION ]</button>
+        </div>
+    </div>
+    
+    <!-- Achievement popup -->
+    <div id="achievement">
+        <div class="ach-title">CAPABILITY UNLOCKED</div>
+        <div class="ach-desc" id="ach-text"></div>
+    </div>
+    
+    <script>
+        // Game State
+        const gameState = {
+            location: 'hub',
+            year: 2047,
+            trust: 3,
+            impact: 0,
+            discovered: new Set(),
+            inventory: [],
+            missionLog: [],
+            totalDiscoverable: 12
+        };
+        
+        // ASCII Art for locations
+        const asciiArt = {
+            hub: `
+     ╔════════════════════════════════════════════════════════════╗
+     ║  CHARLOTTESVILLE RESILIENCE HUB - SECTOR 7                 ║
+     ║  ┌──────┐  ┌──────┐  ▓▓▓▓▓▓  ┌──────┐                      ║
+     ║  │ COMM │  │LEARN │  ▓SOLAR▓  │ DATA │   🌿 Urban Forest   ║
+     ║  │CENTER│──│ LAB  │──▓ARRAY▓──│ CORE │   🌿 Buffer Zone    ║
+     ║  └──────┘  └──────┘  ▓▓▓▓▓▓  └──────┘                      ║
+     ╚════════════════════════════════════════════════════════════╝`,
+            
+            montana: `
+     ╔════════════════════════════════════════════════════════════╗
+     ║  MONTANA PROTECTED AREA MANAGEMENT ZONE                    ║
+     ║      /\\      /\\      ≋≋≋≋≋≋≋      /\\                       ║
+     ║     /  \\    /  \\    ≋ RIVER ≋    /  \\   🦌 Wildlife        ║
+     ║    /🌲  \\  /🌲  \\   ≋≋≋≋≋≋≋    /🌲  \\   Corridor          ║
+     ║   /______\\/______\\            /______\\                     ║
+     ║   [FIELD STATION]  [TRAINING CENTER]  [MONITORING POST]    ║
+     ╚════════════════════════════════════════════════════════════╝`,
+            
+            zimbabwe: `
+     ╔════════════════════════════════════════════════════════════╗
+     ║  ZIMBABWE COMMUNITY RIGHTS NETWORK                         ║
+     ║    🏘️ ════════ 📡 ════════ 🏘️ ════════ 🏘️                  ║
+     ║    Village    Uplink    Village    Village                 ║
+     ║    Alpha      Tower     Beta       Gamma                   ║
+     ║         \\       │       /           │                      ║
+     ║          \\      │      /            │                      ║
+     ║           [RESOURCE MONITORING ZONE]                       ║
+     ╚════════════════════════════════════════════════════════════╝`,
+            
+            virtual: `
+     ╔════════════════════════════════════════════════════════════╗
+     ║  GLOBAL VIRTUAL LEARNING MATRIX                            ║
+     ║                                                            ║
+     ║    ◉───────◉───────◉     ┌─────────────┐                   ║
+     ║    │       │       │     │ ACTIVE NODES│                   ║
+     ║    ◉───────◉───────◉     │   > 10,000  │                   ║
+     ║    │       │       │     │   LEARNERS  │                   ║
+     ║    ◉───────◉───────◉     └─────────────┘                   ║
+     ║         [YOU ARE EVERYWHERE]                               ║
+     ╚════════════════════════════════════════════════════════════╝`,
+            
+            imf: `
+     ╔════════════════════════════════════════════════════════════╗
+     ║  GLOBAL FINANCIAL RESILIENCE INSTITUTE                     ║
+     ║                                                            ║
+     ║    ┌─────────────────────────────────────────┐             ║
+     ║    │  📊  MOOC DISTRIBUTION CENTER  📊       │             ║
+     ║    │   ╔══════╗  ╔══════╗  ╔══════╗         │             ║
+     ║    │   ║COURSE║  ║COURSE║  ║COURSE║         │             ║
+     ║    │   ║ 001  ║  ║ 002  ║  ║ 003  ║         │             ║
+     ║    └─────────────────────────────────────────┘             ║
+     ╚════════════════════════════════════════════════════════════╝`,
+            
+            ending: `
+     ╔════════════════════════════════════════════════════════════╗
+     ║                                                            ║
+     ║         🌍  GLOBAL CAPACITY NETWORK ONLINE  🌍             ║
+     ║                                                            ║
+     ║    ◉═══════◉═══════◉═══════◉═══════◉═══════◉              ║
+     ║    ║       ║       ║       ║       ║       ║              ║
+     ║    ◉═══════◉═══════◉═══════◉═══════◉═══════◉              ║
+     ║    ║       ║       ║       ║       ║       ║              ║
+     ║    ◉═══════◉═══════◉═══════◉═══════◉═══════◉              ║
+     ║                                                            ║
+     ║              [ THE WORK CONTINUES ]                        ║
+     ╚════════════════════════════════════════════════════════════╝`
+        };
+        
+        // Story nodes
+        const storyNodes = {
+            intro: {
+                location: 'hub',
+                narrative: [
+                    { type: 'system', text: '> INCOMING TRANSMISSION...' },
+                    { type: 'system', text: '> ORIGIN: Global Capacity Coordination Network' },
+                    { type: 'normal', text: 'The floods of \'39 took the old world. The heat domes of \'42 tested what remained. But humanity adapted—not through technology alone, but through <span class="highlight">learning systems</span> that helped communities understand, prepare, and transform.' },
+                    { type: 'normal', text: 'You are <span class="highlight">KIRBY CRIDER</span>, Learning Architect. For over 15 years, you\'ve designed systems that build capacity at scale. Now, in 2047, the Resilience Council has activated your file.' },
+                    { type: 'alert', text: 'PRIORITY ALERT: Multiple learning emergencies detected across the network. Your expertise is required.' }
+                ],
+                choices: [
+                    { text: 'Review my capabilities and experience', action: 'viewCapabilities' },
+                    { text: 'Accept the first mission assignment', action: 'mission1' },
+                    { text: 'Access the historical archives (my background)', action: 'archives' }
+                ]
+            },
+            
+            viewCapabilities: {
+                location: 'hub',
+                narrative: [
+                    { type: 'system', text: '> CAPABILITY MATRIX LOADING...' },
+                    { type: 'normal', text: 'Your neural-linked portfolio displays your core capabilities:' },
+                    { type: 'success', text: '<span class="skill-tag">Learning Strategy</span> <span class="skill-tag">Facilitation</span> <span class="skill-tag">Communities of Practice</span> <span class="skill-tag">Knowledge Management</span> <span class="skill-tag">Instructional Design</span>' },
+                    { type: 'success', text: '<span class="skill-tag">ADDIE/SAM/Action Mapping</span> <span class="skill-tag">Virtual & Hybrid Delivery</span> <span class="skill-tag">Equity-Informed Design</span> <span class="skill-tag">LMS Administration</span>' },
+                    { type: 'normal', text: 'Certifications: M.S. Instructional Systems (Florida State), B.A. Psychology (UNC Chapel Hill). 15+ years designing learning for nonprofit, public-sector, and social-impact organizations.' },
+                    { type: 'normal', text: 'You recall the old Training Resources Group days—11 years of building capacity for USAID, World Bank, and countless international partners. The work shaped you.' }
+                ],
+                choices: [
+                    { text: 'Examine AI Learning Design capabilities', action: 'aiCapabilities' },
+                    { text: 'Return to mission briefing', action: 'intro' },
+                    { text: 'Begin first mission', action: 'mission1' }
+                ],
+                discover: 'core_capabilities'
+            },
+            
+            aiCapabilities: {
+                location: 'virtual',
+                narrative: [
+                    { type: 'system', text: '> ACCESSING AI DESIGN PROTOCOLS...' },
+                    { type: 'normal', text: 'In 2025, before the great restructuring, you pioneered <span class="highlight">AI-led learning experiences</span> at Active Learning Sciences.' },
+                    { type: 'success', text: 'ACHIEVEMENT: Designed 30+ chatbot-driven learning experiences (~2 hours each), achieving 95% reduction in development time while maintaining rigorous outcomes.' },
+                    { type: 'normal', text: 'You developed reusable prompt architectures, evaluation logic, and quality standards that other designers adopted. The patterns you created became templates for the adaptive learning systems that now serve millions.' },
+                    { type: 'normal', text: 'The AI wasn\'t replacing teachers—it was <span class="highlight">amplifying human judgment</span>, creating personalized paths through complex governance scenarios.' }
+                ],
+                choices: [
+                    { text: 'See how this connects to current work', action: 'currentWork' },
+                    { text: 'Return to main hub', action: 'intro' }
+                ],
+                discover: 'ai_learning'
+            },
+            
+            currentWork: {
+                location: 'hub',
+                narrative: [
+                    { type: 'system', text: '> CURRENT DEPLOYMENT STATUS...' },
+                    { type: 'normal', text: 'Your active roles pulse on the display:' },
+                    { type: 'success', text: '<span class="highlight">Within Global</span> - Partner, Learning Systems & Strategy (2025-Present): Supporting mission-driven organizations on learning system design, onboarding, and knowledge clarity in evolving organizational environments.' },
+                    { type: 'success', text: '<span class="highlight">Training Resources Group</span> - Freelance Consultant: Providing targeted support to World Bank Group, Inter-American Development Bank, Pew Research Center, and Special Olympics International.' },
+                    { type: 'normal', text: 'The pattern is clear: you work with organizations navigating complexity, helping them learn faster than their challenges evolve.' }
+                ],
+                choices: [
+                    { text: 'Accept Mission 1: Montana Protected Areas', action: 'mission1' },
+                    { text: 'Accept Mission 2: Zimbabwe Community Rights', action: 'mission2' },
+                    { text: 'Return to main hub', action: 'intro' }
+                ],
+                discover: 'current_work'
+            },
+            
+            archives: {
+                location: 'hub',
+                narrative: [
+                    { type: 'system', text: '> ACCESSING HISTORICAL ARCHIVES...' },
+                    { type: 'normal', text: 'The archives reveal your journey:' },
+                    { type: 'normal', text: '<span class="highlight">2010-2013: Windwalker Corporation</span> — You designed scenario-based learning and simulations for public-sector clients. This is where you learned that effective learning isn\'t about information transfer—it\'s about <span class="highlight">behavior change</span>.' },
+                    { type: 'normal', text: '<span class="highlight">2013-2014: CADCA National Coalition Institute</span> — You led curriculum development for a national public health nonprofit, supporting communities building coalitions against substance abuse.' },
+                    { type: 'normal', text: '<span class="highlight">2014-2025: Training Resources Group</span> — 11 years. Learning Technology Specialist, then Consultant, then Board of Directors. You built 50+ e-learning modules, launched podcasts with 10,000+ plays, designed multi-week international seminars.' }
+                ],
+                choices: [
+                    { text: 'Dive deeper into the TRG years', action: 'trgDeep' },
+                    { text: 'Return to present day', action: 'intro' }
+                ],
+                discover: 'career_history'
+            },
+            
+            trgDeep: {
+                location: 'hub',
+                narrative: [
+                    { type: 'system', text: '> TRAINING RESOURCES GROUP: 2014-2025' },
+                    { type: 'normal', text: 'The memories crystallize. An employee-owned firm. Collaborative. Mission-driven.' },
+                    { type: 'normal', text: 'You served on the <span class="highlight">Board of Directors</span>, contributing to organizational governance and strategy. You learned that building learning systems means building <span class="highlight">organizational capacity</span>—not just courses.' },
+                    { type: 'success', text: 'Key Insight: "Multi-day in-person learning CAN be translated into impactful asynchronous experiences—but only when designed intentionally, organized well from the start, and when they bring in a range of different tools."' },
+                    { type: 'normal', text: 'The Private Sector Engagement 101 curriculum proved it: 33 modules, cohort-based learning, user-generated maps, scenario-based learning—all deployed at scale across a global agency.' }
+                ],
+                choices: [
+                    { text: 'See the portfolio projects', action: 'portfolioOverview' },
+                    { text: 'Begin Mission 1', action: 'mission1' }
+                ],
+                discover: 'trg_leadership'
+            },
+            
+            portfolioOverview: {
+                location: 'virtual',
+                narrative: [
+                    { type: 'system', text: '> PORTFOLIO ARCHIVE ACCESSED' },
+                    { type: 'normal', text: 'Your life\'s work flickers across holographic displays:' },
+                    { type: 'success', text: '📍 International Seminar on Protected Area Management — Multi-week experiential program, 20 countries, skilled facilitation creating psychological safety across vast differences.' },
+                    { type: 'success', text: '📍 Community Environmental Rights Video Series (Zimbabwe) — 9 videos in English, Ndebele, and Shona. Remote collaboration, smartphone voiceover, rapid deployment.' },
+                    { type: 'success', text: '📍 Cybersecurity for Development — High-production animated videos for USAID global staff. You got your hands in the After Effects mix.' },
+                    { type: 'success', text: '📍 Natural Resource Crime Investigation — Virtual capstone simulation. Articulate Storyline used LIVE in Zoom breakout rooms. "The best virtual classroom I\'ve ever been in."' },
+                    { type: 'success', text: '📍 Health Governance Podcast — 10,000+ plays globally. Yes, there\'s an excerpt of a rap about the SDGs.' }
+                ],
+                choices: [
+                    { text: 'Explore the Montana mission in depth', action: 'mission1' },
+                    { text: 'Explore the Zimbabwe mission in depth', action: 'mission2' },
+                    { text: 'Explore the Virtual Learning innovations', action: 'mission3' }
+                ],
+                discover: 'portfolio_overview'
+            },
+            
+            mission1: {
+                location: 'montana',
+                narrative: [
+                    { type: 'system', text: '> MISSION BRIEFING: PROTECTED AREA CRISIS' },
+                    { type: 'alert', text: 'LOCATION: Montana Bioregion | STATUS: Climate migration pressure intensifying' },
+                    { type: 'normal', text: 'Twenty protected area managers from around the world have gathered. They come from vastly different political, cultural, and ecological contexts. The forests are changing faster than management protocols can adapt.' },
+                    { type: 'normal', text: 'You recall the <span class="highlight">International Seminar on Protected Area Management (ISPAM)</span>—a three-week experiential program you helped design and facilitate with the U.S. Forest Service and University of Montana.' },
+                    { type: 'normal', text: 'Your role: create a learning environment where participants can surface experience, disagreement, and insight constructively—turning <span class="highlight">diversity of context into a learning asset</span> rather than a barrier.' }
+                ],
+                choices: [
+                    { text: 'Facilitate a systems thinking exercise', action: 'mission1_systems' },
+                    { text: 'Guide a structured reflection session', action: 'mission1_reflection' },
+                    { text: 'Return to hub for different mission', action: 'intro' }
+                ],
+                discover: 'ispam_overview'
+            },
+            
+            mission1_systems: {
+                location: 'montana',
+                narrative: [
+                    { type: 'normal', text: 'You deploy the <span class="highlight">Blue Mountain Recreation Area Virtual Site Visit</span>—a tool you built using Articulate Storyline and the Adobe Suite.' },
+                    { type: 'normal', text: 'The simulation isn\'t a "next-button-slide-deck." It combines opportunistically-captured video with interactive simulations that help managers explore trade-offs, stakeholder perspectives, and cascading consequences.' },
+                    { type: 'success', text: 'The Kenyan park warden sees parallels to her elephant corridor challenges. The Brazilian reserve manager recognizes patterns from his fire management decisions. A Thai marine sanctuary director draws unexpected connections.' },
+                    { type: 'normal', text: 'Key Lesson: <span class="highlight">Rapid e-learning tools aren\'t just for click-through modules.</span> With smart design, they can drive high-stakes, collaborative experiences.' }
+                ],
+                choices: [
+                    { text: 'Continue to the field exercise', action: 'mission1_complete' },
+                    { text: 'Try the reflection approach instead', action: 'mission1_reflection' }
+                ],
+                discover: 'blue_mountain'
+            },
+            
+            mission1_reflection: {
+                location: 'montana',
+                narrative: [
+                    { type: 'normal', text: 'You gather the group for structured reflection. Your facilitation training kicks in—you\'ve done this across continents, cultures, and contexts.' },
+                    { type: 'normal', text: 'You create space for the uncomfortable truths: the Colombian manager faces cartel pressure his Norwegian counterpart can\'t imagine. The Indian forester operates under bureaucratic constraints that would paralyze the American team.' },
+                    { type: 'success', text: 'The magic happens in the margins—coffee breaks, shared meals, walks between sites. This is where real peer learning occurs. Your job is to design the container that makes these moments possible.' },
+                    { type: 'normal', text: 'Key Lesson: <span class="highlight">High-impact international learning depends as much on facilitation quality and psychological safety as on technical content.</span>' }
+                ],
+                choices: [
+                    { text: 'Complete the Montana mission', action: 'mission1_complete' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'facilitation_deep'
+            },
+            
+            mission1_complete: {
+                location: 'montana',
+                narrative: [
+                    { type: 'success', text: '> MISSION COMPLETE: Montana Protected Areas' },
+                    { type: 'normal', text: 'The three-week seminar concludes. Twenty managers return to their homes across six continents, carrying not just knowledge but <span class="highlight">a network</span>.' },
+                    { type: 'normal', text: 'They\'ll stay connected through the community of practice you helped establish. They\'ll share resources, troubleshoot challenges, and remind each other that their work matters.' },
+                    { type: 'success', text: '+25 IMPACT POINTS | +1 TRUST LEVEL' },
+                    { type: 'normal', text: 'The real measure of success isn\'t what they learned here—it\'s what they\'ll do differently when they face their next impossible decision.' }
+                ],
+                choices: [
+                    { text: 'Accept Mission 2: Zimbabwe Community Rights', action: 'mission2' },
+                    { text: 'Accept Mission 3: Virtual Learning Crisis', action: 'mission3' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'montana_complete'
+            },
+            
+            mission2: {
+                location: 'zimbabwe',
+                narrative: [
+                    { type: 'system', text: '> MISSION BRIEFING: COMMUNITY RIGHTS EMERGENCY' },
+                    { type: 'alert', text: 'LOCATION: Zimbabwe Rural Network | STATUS: Mining expansion threatening community lands' },
+                    { type: 'normal', text: 'Mining companies are seeking to extract resources on community lands. The people living there have rights—but many don\'t know what those rights are or how to exercise them.' },
+                    { type: 'normal', text: 'You remember the partnership with <span class="highlight">ZELA</span>, a Zimbabwean NGO fighting for environmental justice. The U.S. Forest Service asked you to help get critical information into communities\' hands.' },
+                    { type: 'normal', text: 'The challenge: low bandwidth, limited literacy in some areas, communities that won\'t sit through a training or read a long PDF brief.' }
+                ],
+                choices: [
+                    { text: 'Develop the video series strategy', action: 'mission2_video' },
+                    { text: 'Explore remote collaboration approach', action: 'mission2_remote' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'zimbabwe_context'
+            },
+            
+            mission2_video: {
+                location: 'zimbabwe',
+                narrative: [
+                    { type: 'normal', text: 'You led a team that produced <span class="highlight">9 videos in English, Ndebele, and Shona</span>—the languages communities actually speak.' },
+                    { type: 'normal', text: 'The videos covered mining impacts, the environmental impact assessment process, and the role of community monitors. You used existing footage, animation, and voiceover to communicate core ideas quickly and clearly.' },
+                    { type: 'success', text: 'Key Innovation: Remote voiceover recording on smartphones, cleaned up with tools like Adobe Podcast Enhance. High production value, distributed creation.' },
+                    { type: 'normal', text: 'The videos spread through community networks, played on phones passed hand to hand, shown at village gatherings. The information traveled further than any training program could reach.' }
+                ],
+                choices: [
+                    { text: 'Complete Zimbabwe mission', action: 'mission2_complete' },
+                    { text: 'Explore the remote collaboration', action: 'mission2_remote' }
+                ],
+                discover: 'zela_videos'
+            },
+            
+            mission2_remote: {
+                location: 'zimbabwe',
+                narrative: [
+                    { type: 'normal', text: 'You never set foot in Zimbabwe for this project. The collaboration was entirely remote—working across time zones, navigating connectivity challenges, building trust through video calls and shared documents.' },
+                    { type: 'normal', text: 'Your NGO partners in Zimbabwe knew their communities. You knew how to structure learning, capture attention, and convey complex information simply. Together, you created something neither could have built alone.' },
+                    { type: 'success', text: 'Key Lesson: <span class="highlight">Videos can be powerful ways to get a message out</span>, especially in low-bandwidth environments and for those who might not be willing to read a long PDF or sit in front of a course.' },
+                    { type: 'normal', text: 'The approach has been replicated since—community-created content, professionally structured, distributed through existing social networks.' }
+                ],
+                choices: [
+                    { text: 'Complete Zimbabwe mission', action: 'mission2_complete' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'remote_collab'
+            },
+            
+            mission2_complete: {
+                location: 'zimbabwe',
+                narrative: [
+                    { type: 'success', text: '> MISSION COMPLETE: Zimbabwe Community Rights' },
+                    { type: 'normal', text: 'Communities now know their rights. When mining companies come, people ask questions, demand impact assessments, organize monitors. The balance of power has shifted—slightly, but meaningfully.' },
+                    { type: 'success', text: '+30 IMPACT POINTS | +1 TRUST LEVEL' },
+                    { type: 'normal', text: 'You think about the ripple effects. One community that successfully negotiates protections becomes a model for the next. The videos keep circulating, keep teaching, keep building capacity long after the project officially ended.' }
+                ],
+                choices: [
+                    { text: 'Accept Mission 3: Virtual Learning Crisis', action: 'mission3' },
+                    { text: 'Accept Mission 4: Global Scale Challenge', action: 'mission4' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'zimbabwe_complete'
+            },
+            
+            mission3: {
+                location: 'virtual',
+                narrative: [
+                    { type: 'system', text: '> MISSION BRIEFING: VIRTUAL LEARNING EMERGENCY' },
+                    { type: 'alert', text: 'YEAR: 2020 | STATUS: Global pandemic. All in-person training cancelled.' },
+                    { type: 'normal', text: 'The <span class="highlight">Natural Resource Crime Investigation</span> course was supposed to be two weeks in a classroom. Law enforcement officers learning to investigate illegal logging, mining, arson. The capstone was a full-day simulation: surveillance, mock interviews, evidence gathering, building a prosecutable case.' },
+                    { type: 'normal', text: 'Now it needs to happen over Zoom. With limited budget. Under time pressure. The learning outcomes can\'t be compromised—these officers will face real criminals.' },
+                    { type: 'normal', text: 'Most people said it couldn\'t be done virtually. You got creative.' }
+                ],
+                choices: [
+                    { text: 'Design the virtual simulation', action: 'mission3_design' },
+                    { text: 'See the innovative delivery approach', action: 'mission3_delivery' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'nrc_overview'
+            },
+            
+            mission3_design: {
+                location: 'virtual',
+                narrative: [
+                    { type: 'normal', text: 'You broke the exercise into its core behaviors: interviewing, evidence collection, investigative planning. Then you rebuilt the experience inside a custom <span class="highlight">Articulate Storyline module</span>.' },
+                    { type: 'normal', text: 'But here\'s the twist: you didn\'t deliver it as a typical self-directed module. You used it <span class="highlight">live</span>.' },
+                    { type: 'success', text: 'In Zoom breakout rooms, small teams worked through the simulation together. One participant "drove" while the group collaborated in real time. The module paced and framed decision-making; the group context brought energy and realism.' },
+                    { type: 'normal', text: 'Each team presented their final case analysis to a virtual "prosecutor." The stakes felt real because the learning design made them real.' }
+                ],
+                choices: [
+                    { text: 'See the results', action: 'mission3_complete' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'nrc_design'
+            },
+            
+            mission3_delivery: {
+                location: 'virtual',
+                narrative: [
+                    { type: 'normal', text: 'The key insight: <span class="highlight">Rapid e-learning tools aren\'t just for click-through modules.</span>' },
+                    { type: 'normal', text: 'Storyline became the backbone of a live, collaborative experience. The tool paced the exercise, surfaced information at the right moments, tracked decisions—but the humans in breakout rooms did the thinking, debating, and deciding.' },
+                    { type: 'success', text: 'Participant feedback: <span class="highlight">"This is the best virtual classroom I\'ve ever been in."</span>' },
+                    { type: 'normal', text: 'The approach has been adapted since—hybrid simulations, live-facilitated e-learning, group problem-solving through structured digital environments. What started as pandemic adaptation became permanent innovation.' }
+                ],
+                choices: [
+                    { text: 'Complete Mission 3', action: 'mission3_complete' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'nrc_innovation'
+            },
+            
+            mission3_complete: {
+                location: 'virtual',
+                narrative: [
+                    { type: 'success', text: '> MISSION COMPLETE: Virtual Learning Crisis' },
+                    { type: 'normal', text: 'Officers returned to their regions equipped with skills they\'d practiced under pressure. Cases were built, evidence was gathered, prosecutions succeeded.' },
+                    { type: 'success', text: '+25 IMPACT POINTS | CAPABILITY UNLOCKED: "Hybrid Innovation"' },
+                    { type: 'normal', text: 'The pandemic proved something important: constraints can be catalysts. When you can\'t rely on familiar formats, you\'re forced to ask what really matters about the learning experience—and often, you find better answers.' }
+                ],
+                choices: [
+                    { text: 'Accept Mission 4: Global Scale Challenge', action: 'mission4' },
+                    { text: 'Review all capabilities before final mission', action: 'viewCapabilities' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'virtual_complete'
+            },
+            
+            mission4: {
+                location: 'imf',
+                narrative: [
+                    { type: 'system', text: '> FINAL MISSION: GLOBAL SCALE DEPLOYMENT' },
+                    { type: 'alert', text: 'CHALLENGE: Transform multi-day in-person training into scalable global learning' },
+                    { type: 'normal', text: 'USAID\'s Private Sector Engagement Hub had a problem: their 1-week in-person course on engaging private sector partners was reaching hundreds. They needed to reach thousands.' },
+                    { type: 'normal', text: 'The easy answer was to record the presentations and call it e-learning. But you knew that would fail. <span class="highlight">40 hours of next-button e-learning won\'t work.</span>' },
+                    { type: 'normal', text: 'You needed to rethink the entire learning architecture.' }
+                ],
+                choices: [
+                    { text: 'Design the cohort-based system', action: 'mission4_design' },
+                    { text: 'See the multi-modal approach', action: 'mission4_tools' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'pse_overview'
+            },
+            
+            mission4_design: {
+                location: 'imf',
+                narrative: [
+                    { type: 'normal', text: 'You created a <span class="highlight">33-module virtual curriculum</span> that wasn\'t just a course—it was a system.' },
+                    { type: 'normal', text: 'Cohort-based learning: participants moved through together, creating accountability and peer connection. Virtual spaces for sharing lessons. User-generated maps showing where people were applying concepts. Microlearning content for busy schedules. Videos and animations for complex concepts. Scenario-based learning for decision practice.' },
+                    { type: 'success', text: 'The LMS was used in innovative ways—not just as content delivery, but as community platform, reflection space, and progress tracker.' },
+                    { type: 'normal', text: 'Key Lesson: <span class="highlight">Multi-day in-person learning CAN be translated into impactful asynchronous experiences</span>—but only when designed intentionally, organized well from the start, and when they bring in a range of different tools.' }
+                ],
+                choices: [
+                    { text: 'Complete final mission', action: 'ending' },
+                    { text: 'See the multi-modal toolkit', action: 'mission4_tools' }
+                ],
+                discover: 'pse_design'
+            },
+            
+            mission4_tools: {
+                location: 'imf',
+                narrative: [
+                    { type: 'normal', text: 'Your toolkit for this mission included:' },
+                    { type: 'success', text: '• <span class="skill-tag">Articulate 360</span> for interactive modules<br>• <span class="skill-tag">Adobe Premiere/After Effects</span> for video production<br>• <span class="skill-tag">LMS innovation</span> for community features<br>• <span class="skill-tag">Cohort architecture</span> for peer learning<br>• <span class="skill-tag">Scenario design</span> for application practice' },
+                    { type: 'normal', text: 'But tools are just tools. The real work was <span class="highlight">understanding what the in-person experience actually accomplished</span>—and finding new ways to achieve those same outcomes at scale.' },
+                    { type: 'normal', text: 'Thousands of USAID staff around the world now have access to learning that used to require a flight to Washington.' }
+                ],
+                choices: [
+                    { text: 'Complete final mission', action: 'ending' },
+                    { text: 'Return to hub', action: 'intro' }
+                ],
+                discover: 'pse_tools'
+            },
+            
+            ending: {
+                location: 'ending',
+                narrative: [
+                    { type: 'system', text: '> SIMULATION COMPLETE' },
+                    { type: 'success', text: '════════════════════════════════════════' },
+                    { type: 'normal', text: 'The year is 2047. Or maybe it\'s today. The work is the same.' },
+                    { type: 'normal', text: '<span class="highlight">Kirby Crider</span> designs learning systems that help people and organizations adapt faster than their challenges evolve.' },
+                    { type: 'normal', text: 'From Montana forests to Zimbabwean villages. From pandemic Zoom rooms to global LMS deployments. From AI-driven chatbots to intimate in-person seminars with participants from 20 countries.' },
+                    { type: 'success', text: 'The thread that connects it all: <span class="highlight">Systems that build capacity at scale.</span>' },
+                    { type: 'normal', text: 'Whether the context is climate adaptation, public health, natural resource protection, private sector engagement, or organizational transformation—the core work remains: helping people learn what they need to learn, when they need to learn it, in ways that actually change what they do.' },
+                    { type: 'alert', text: '▸ Ready to discuss how these capabilities might serve your organization?' }
+                ],
+                choices: [
+                    { text: '📧 Send Email: kirby.crider@gmail.com', action: 'contact_email' },
+                    { text: '📞 Call: 919-357-1797', action: 'contact_phone' },
+                    { text: '💼 View LinkedIn Profile', action: 'contact_linkedin' },
+                    { text: '🌐 Explore Full Portfolio', action: 'contact_portfolio' },
+                    { text: 'Replay the simulation', action: 'intro' }
+                ],
+                discover: 'ending_complete'
+            }
+        };
+        
+        // Inventory items
+        const inventoryItems = {
+            core_capabilities: '• Learning Strategy & Design',
+            ai_learning: '• AI Learning Architecture',
+            current_work: '• Active Consulting Practice',
+            career_history: '• 15+ Years Experience',
+            trg_leadership: '• Board-Level Leadership',
+            portfolio_overview: '• Multi-Modal Portfolio',
+            ispam_overview: '• International Facilitation',
+            blue_mountain: '• Virtual Site Visits',
+            facilitation_deep: '• Psychological Safety Design',
+            montana_complete: '• Protected Area Expertise',
+            zimbabwe_context: '• Community Rights Work',
+            zela_videos: '• Multilingual Video Production',
+            remote_collab: '• Remote Collaboration',
+            zimbabwe_complete: '• Environmental Justice',
+            nrc_overview: '• Crisis Adaptation',
+            nrc_design: '• Simulation Design',
+            nrc_innovation: '• Hybrid Innovation',
+            virtual_complete: '• Virtual Classroom Mastery',
+            pse_overview: '• Scale Transformation',
+            pse_design: '• Cohort-Based Learning',
+            pse_tools: '• Multi-Modal Toolkit',
+            ending_complete: '• Full Portfolio Review'
+        };
+        
+        // DOM Elements
+        let narrativePanel, choicesContainer, asciiDisplay, inventoryList, missionLog;
+        let discoveryBar, discoveryPct, currentLocationEl, trustLevelEl, impactScoreEl;
+        
+        // Initialize game
+        function initGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            narrativePanel = document.getElementById('narrative-panel');
+            choicesContainer = document.getElementById('choices-container');
+            asciiDisplay = document.getElementById('ascii-display');
+            inventoryList = document.getElementById('inventory-list');
+            missionLog = document.getElementById('mission-log');
+            discoveryBar = document.getElementById('discovery-bar');
+            discoveryPct = document.getElementById('discovery-pct');
+            currentLocationEl = document.getElementById('current-location');
+            trustLevelEl = document.getElementById('trust-level');
+            impactScoreEl = document.getElementById('impact-score');
+            
+            loadNode('intro');
+        }
+        
+        // Load a story node
+        function loadNode(nodeId) {
+            const node = storyNodes[nodeId];
+            if (!node) return;
+            
+            // Update location
+            gameState.location = node.location;
+            updateLocationDisplay();
+            
+            // Update ASCII art
+            asciiDisplay.textContent = asciiArt[node.location] || asciiArt.hub;
+            
+            // Clear and populate narrative
+            narrativePanel.innerHTML = '';
+            node.narrative.forEach((item, index) => {
+                setTimeout(() => {
+                    addNarrativeText(item.text, item.type);
+                }, index * 300);
+            });
+            
+            // Handle discovery
+            if (node.discover && !gameState.discovered.has(node.discover)) {
+                gameState.discovered.add(node.discover);
+                gameState.inventory.push(inventoryItems[node.discover]);
+                updateInventory();
+                updateProgress();
+                showAchievement(inventoryItems[node.discover]);
+                
+                // Update impact for completed missions
+                if (node.discover.includes('complete')) {
+                    gameState.impact += 25;
+                    gameState.trust = Math.min(5, gameState.trust + 1);
+                    updateStats();
+                }
+            }
+            
+            // Load choices after narrative
+            setTimeout(() => {
+                loadChoices(node.choices);
+            }, node.narrative.length * 300 + 200);
+        }
+        
+        // Add narrative text with typing effect
+        function addNarrativeText(text, type = 'normal') {
+            const p = document.createElement('p');
+            p.className = `narrative-text ${type}`;
+            p.innerHTML = text;
+            narrativePanel.appendChild(p);
+            narrativePanel.scrollTop = narrativePanel.scrollHeight;
+        }
+        
+        // Load choices
+        function loadChoices(choices) {
+            choicesContainer.innerHTML = '';
+            choices.forEach((choice, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.innerHTML = `<span class="key">${index + 1}</span>${choice.text}`;
+                btn.onclick = () => handleChoice(choice.action);
+                choicesContainer.appendChild(btn);
+            });
+        }
+        
+        // Handle choice selection
+        function handleChoice(action) {
+            // Handle contact actions
+            if (action === 'contact_email') {
+                window.open('mailto:kirby.crider@gmail.com', '_blank');
+                return;
+            }
+            if (action === 'contact_phone') {
+                window.open('tel:919-357-1797', '_blank');
+                return;
+            }
+            if (action === 'contact_linkedin') {
+                window.open('https://linkedin.com/in/kirbycrider', '_blank');
+                return;
+            }
+            if (action === 'contact_portfolio') {
+                window.open('https://kirbyc.carrd.co', '_blank');
+                return;
+            }
+            
+            // Add to mission log
+            const timestamp = `[${String(Math.floor(Math.random() * 24)).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}]`;
+            gameState.missionLog.unshift(`${timestamp} → ${action.replace(/_/g, ' ')}`);
+            updateMissionLog();
+            
+            // Load next node
+            loadNode(action);
+        }
+        
+        // Update displays
+        function updateLocationDisplay() {
+            const locations = {
+                hub: 'Charlottesville Hub',
+                montana: 'Montana Bioregion',
+                zimbabwe: 'Zimbabwe Network',
+                virtual: 'Virtual Matrix',
+                imf: 'Global Institute',
+                ending: 'Network Complete'
+            };
+            currentLocationEl.textContent = locations[gameState.location] || 'Unknown';
+        }
+        
+        function updateInventory() {
+            inventoryList.innerHTML = gameState.inventory.map(item => 
+                `<div class="inventory-item">${item}</div>`
+            ).join('');
+        }
+        
+        function updateMissionLog() {
+            missionLog.innerHTML = gameState.missionLog.slice(0, 5).map(entry =>
+                `<div style="font-size: 0.75rem; margin-bottom: 5px; color: var(--amber);">${entry}</div>`
+            ).join('');
+        }
+        
+        function updateProgress() {
+            const pct = Math.round((gameState.discovered.size / gameState.totalDiscoverable) * 100);
+            discoveryPct.textContent = pct;
+            discoveryBar.style.width = `${pct}%`;
+        }
+        
+        function updateStats() {
+            const trustSymbols = '●'.repeat(gameState.trust) + '○'.repeat(5 - gameState.trust);
+            trustLevelEl.textContent = trustSymbols;
+            impactScoreEl.textContent = gameState.impact;
+        }
+        
+        // Achievement popup
+        function showAchievement(text) {
+            const ach = document.getElementById('achievement');
+            document.getElementById('ach-text').textContent = text;
+            ach.classList.add('show');
+            setTimeout(() => ach.classList.remove('show'), 3000);
+        }
+        
+        // Modal functions
+        function showModal(title, body) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').innerHTML = body;
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '1' && e.key <= '9') {
+                const index = parseInt(e.key) - 1;
+                const buttons = choicesContainer.querySelectorAll('.choice-btn');
+                if (buttons[index]) {
+                    buttons[index].click();
+                }
+            }
+        });
+        
+        // Start button
+        document.getElementById('start-btn').addEventListener('click', initGame);
+    </script>
+</body>
+</html>
