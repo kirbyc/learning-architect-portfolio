@@ -3,35 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KIRBY CRIDER: Learning Architect of the Anthropocene</title>
+    <title>KIRBY CRIDER | The Learning Operative</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:wght@400;700&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         :root {
-            --green: #39ff14;
-            --amber: #ffbf00;
-            --cyan: #00ffff;
-            --magenta: #ff00ff;
-            --coral: #ff6b6b;
-            --bg-dark: #0a0a0f;
-            --bg-panel: #12121a;
+            --terminal-green: #39ff14;
+            --warning-amber: #ffbf00;
+            --danger-red: #ff3131;
+            --hope-cyan: #00fff7;
+            --deep-ocean: #0a1628;
+            --storm-gray: #1a2a3a;
+            --pixel-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+            --xp-purple: #a855f7;
+            --health-red: #ef4444;
+            --mana-blue: #3b82f6;
         }
-        
+
         body {
-            font-family: 'Space Mono', monospace;
-            background: var(--bg-dark);
-            color: var(--green);
+            font-family: 'VT323', monospace;
+            background: var(--deep-ocean);
             min-height: 100vh;
+            color: #e0e0e0;
             overflow-x: hidden;
         }
-        
-        /* Scanline effect */
+
         body::before {
             content: '';
             position: fixed;
@@ -41,1240 +42,2990 @@
             height: 100%;
             background: repeating-linear-gradient(
                 0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
+                rgba(0, 0, 0, 0.1) 0px,
+                rgba(0, 0, 0, 0.1) 1px,
                 transparent 1px,
                 transparent 2px
             );
             pointer-events: none;
             z-index: 1000;
         }
-        
-        /* CRT flicker */
+
         @keyframes flicker {
-            0% { opacity: 0.97; }
-            50% { opacity: 1; }
-            100% { opacity: 0.98; }
+            0%, 100% { opacity: 1; }
+            92% { opacity: 1; }
+            93% { opacity: 0.8; }
+            94% { opacity: 1; }
         }
-        
-        #game-container {
-            max-width: 1000px;
+
+        .game-wrapper {
+            animation: flicker 4s infinite;
+        }
+
+        .container {
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            animation: flicker 0.1s infinite;
+            position: relative;
         }
-        
-        #header {
+
+        /* TITLE SCREEN */
+        .title-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            padding: 30px 0;
-            border-bottom: 2px solid var(--green);
-            margin-bottom: 20px;
+            padding: 40px 20px;
+            position: relative;
         }
-        
-        #header h1 {
-            font-family: 'VT323', monospace;
-            font-size: clamp(1.8rem, 5vw, 3rem);
-            color: var(--cyan);
-            text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
-            letter-spacing: 3px;
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
         }
-        
-        #header .subtitle {
-            font-size: 0.9rem;
-            color: var(--amber);
-            margin-top: 10px;
-            opacity: 0.8;
+
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            animation: twinkle 2s infinite;
         }
-        
-        #status-bar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            padding: 15px;
-            background: var(--bg-panel);
-            border: 1px solid var(--green);
-            margin-bottom: 20px;
-            font-size: 0.8rem;
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
         }
-        
-        .stat {
+
+        .title-art {
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pixel-avatar {
+            width: 120px;
+            height: 140px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+
+        .avatar-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(0,255,247,0.4) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .avatar-sprite {
+            position: relative;
+            z-index: 2;
+        }
+
+        .avatar-head {
+            width: 40px;
+            height: 40px;
+            background: #f4c587;
+            border-radius: 8px;
+            margin: 0 auto;
+            position: relative;
+            border: 3px solid #d4a574;
+        }
+
+        .avatar-eyes {
+            position: absolute;
+            top: 12px;
+            left: 8px;
+            right: 8px;
             display: flex;
             justify-content: space-between;
-            padding: 5px 10px;
-            border-left: 3px solid var(--cyan);
         }
-        
-        .stat-label { color: var(--amber); }
-        .stat-value { color: var(--green); }
-        
-        #main-display {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
+
+        .eye {
+            width: 6px;
+            height: 6px;
+            background: #333;
+            border-radius: 50%;
         }
-        
-        @media (min-width: 768px) {
-            #main-display {
-                grid-template-columns: 2fr 1fr;
-            }
+
+        .avatar-body {
+            width: 50px;
+            height: 45px;
+            background: linear-gradient(180deg, var(--hope-cyan) 0%, #0891b2 100%);
+            margin: 0 auto;
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            border: 3px solid #0e7490;
         }
-        
-        #narrative-panel {
-            background: var(--bg-panel);
-            border: 1px solid var(--green);
-            padding: 20px;
-            min-height: 300px;
-            max-height: 500px;
-            overflow-y: auto;
+
+        .avatar-cape {
+            position: absolute;
+            top: 5px;
+            left: -15px;
+            width: 15px;
+            height: 40px;
+            background: linear-gradient(180deg, var(--xp-purple) 0%, #7c3aed 100%);
+            border-radius: 0 0 0 10px;
+            transform: skewY(-10deg);
+            animation: capeFlow 2s ease-in-out infinite;
         }
-        
-        #narrative-panel::-webkit-scrollbar {
-            width: 8px;
+
+        @keyframes capeFlow {
+            0%, 100% { transform: skewY(-10deg); }
+            50% { transform: skewY(-5deg) translateX(-3px); }
         }
-        
-        #narrative-panel::-webkit-scrollbar-track {
-            background: var(--bg-dark);
+
+        .avatar-legs {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
         }
-        
-        #narrative-panel::-webkit-scrollbar-thumb {
-            background: var(--green);
+
+        .leg {
+            width: 15px;
+            height: 20px;
+            background: #4a5568;
+            border: 2px solid #2d3748;
         }
-        
-        .narrative-text {
-            line-height: 1.8;
+
+        .class-badge {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--warning-amber);
+            color: #000;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.4rem;
+            padding: 4px 8px;
+            white-space: nowrap;
+        }
+
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.4rem;
+            color: var(--terminal-green);
+            text-shadow: 
+                3px 3px 0 #006600,
+                -1px -1px 0 var(--hope-cyan);
+            letter-spacing: 3px;
             margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
         }
-        
-        .narrative-text.system {
-            color: var(--amber);
-            font-style: italic;
+
+        .game-subtitle {
+            font-size: 1.8rem;
+            color: var(--hope-cyan);
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
         }
-        
-        .narrative-text.alert {
-            color: var(--coral);
-            border-left: 3px solid var(--coral);
-            padding-left: 10px;
+
+        .title-tagline {
+            font-size: 1.3rem;
+            color: #888;
+            max-width: 500px;
+            line-height: 1.6;
+            margin-bottom: 50px;
+            position: relative;
+            z-index: 1;
         }
-        
-        .narrative-text.success {
-            color: var(--cyan);
-            border-left: 3px solid var(--cyan);
-            padding-left: 10px;
-        }
-        
-        .highlight {
-            color: var(--magenta);
-            font-weight: bold;
-        }
-        
-        .skill-tag {
-            display: inline-block;
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid var(--cyan);
-            padding: 2px 8px;
-            margin: 2px;
-            font-size: 0.75rem;
-            color: var(--cyan);
-        }
-        
-        #side-panel {
+
+        .menu-options {
             display: flex;
             flex-direction: column;
             gap: 15px;
+            position: relative;
+            z-index: 1;
         }
-        
-        .panel-section {
-            background: var(--bg-panel);
-            border: 1px solid var(--green);
-            padding: 15px;
+
+        .menu-option {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: #666;
+            cursor: pointer;
+            padding: 15px 40px;
+            border: none;
+            background: transparent;
+            transition: all 0.15s ease;
+            position: relative;
         }
-        
-        .panel-title {
-            font-family: 'VT323', monospace;
-            font-size: 1.2rem;
-            color: var(--amber);
-            border-bottom: 1px solid var(--amber);
-            padding-bottom: 5px;
+
+        .menu-option::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid var(--warning-amber);
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .menu-option:hover {
+            color: var(--warning-amber);
+        }
+
+        .menu-option:hover::before {
+            opacity: 1;
+        }
+
+        .menu-option.selected {
+            color: var(--warning-amber);
+        }
+
+        .menu-option.selected::before {
+            opacity: 1;
+            animation: menuArrow 0.5s ease-in-out infinite;
+        }
+
+        @keyframes menuArrow {
+            0%, 100% { left: 10px; }
+            50% { left: 15px; }
+        }
+
+        .copyright {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.9rem;
+            color: #444;
+            z-index: 1;
+        }
+
+        /* CHARACTER SELECT */
+        .char-select {
+            display: none;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .char-select.active {
+            display: block;
+        }
+
+        .char-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .char-header h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--warning-amber);
             margin-bottom: 10px;
         }
-        
-        #inventory-list, #mission-log {
+
+        .char-header p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .char-display {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .char-model {
+            text-align: center;
+        }
+
+        .large-avatar {
+            width: 150px;
+            height: 180px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .large-avatar .avatar-glow {
+            width: 200px;
+            height: 200px;
+        }
+
+        .large-avatar .avatar-head {
+            width: 60px;
+            height: 60px;
+        }
+
+        .large-avatar .avatar-eyes {
+            top: 18px;
+            left: 12px;
+            right: 12px;
+        }
+
+        .large-avatar .eye {
+            width: 10px;
+            height: 10px;
+        }
+
+        .large-avatar .avatar-body {
+            width: 80px;
+            height: 70px;
+        }
+
+        .large-avatar .avatar-cape {
+            width: 25px;
+            height: 65px;
+            left: -22px;
+        }
+
+        .large-avatar .leg {
+            width: 25px;
+            height: 30px;
+        }
+
+        .char-name {
+            font-family: 'Press Start 2P', cursive;
             font-size: 0.8rem;
-            line-height: 1.6;
+            color: var(--terminal-green);
+            margin-bottom: 5px;
         }
-        
-        .inventory-item {
-            padding: 5px 0;
-            border-bottom: 1px dashed rgba(57, 255, 20, 0.3);
-            cursor: pointer;
-            transition: color 0.2s;
+
+        .char-class {
+            font-size: 1.2rem;
+            color: var(--hope-cyan);
         }
-        
-        .inventory-item:hover {
-            color: var(--cyan);
+
+        .stat-card {
+            background: rgba(0,0,0,0.5);
+            border: 3px solid #333;
+            padding: 25px;
+            min-width: 300px;
         }
-        
-        #choices-panel {
-            margin-top: 20px;
-            padding: 20px;
-            background: var(--bg-panel);
-            border: 1px solid var(--amber);
+
+        .stat-card h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--warning-amber);
+            margin-bottom: 20px;
+            text-align: center;
         }
-        
-        #choices-panel h3 {
-            font-family: 'VT323', monospace;
-            color: var(--amber);
+
+        .stat-row {
+            display: flex;
+            align-items: center;
             margin-bottom: 15px;
         }
-        
-        .choice-btn {
-            display: block;
-            width: 100%;
-            padding: 12px 15px;
-            margin: 8px 0;
-            background: transparent;
-            border: 1px solid var(--green);
-            color: var(--green);
-            font-family: 'Space Mono', monospace;
+
+        .stat-name {
+            width: 120px;
+            font-size: 1.1rem;
+            color: #888;
+        }
+
+        .stat-bar-container {
+            flex: 1;
+            height: 16px;
+            background: #1a1a2e;
+            border: 2px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            transition: width 1s ease;
+        }
+
+        .stat-bar-fill.str { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .stat-bar-fill.int { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .stat-bar-fill.wis { background: linear-gradient(90deg, #a855f7, #c084fc); }
+        .stat-bar-fill.cha { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .stat-bar-fill.dex { background: linear-gradient(90deg, #22c55e, #4ade80); }
+        .stat-bar-fill.end { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+
+        .stat-value {
+            width: 40px;
+            text-align: right;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            color: #fff;
+            margin-left: 10px;
+        }
+
+        .abilities-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #333;
+        }
+
+        .abilities-section h4 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            color: var(--hope-cyan);
+            margin-bottom: 15px;
+        }
+
+        .ability-tag {
+            display: inline-block;
             font-size: 0.9rem;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s;
+            padding: 5px 10px;
+            margin: 3px;
+            background: rgba(0,255,247,0.1);
+            border: 1px solid var(--hope-cyan);
+            color: var(--hope-cyan);
         }
-        
-        .choice-btn:hover {
-            background: rgba(57, 255, 20, 0.1);
-            border-color: var(--cyan);
-            color: var(--cyan);
-            transform: translateX(5px);
-        }
-        
-        .choice-btn .key {
-            display: inline-block;
-            width: 25px;
-            height: 25px;
-            background: var(--green);
-            color: var(--bg-dark);
+
+        .char-actions {
             text-align: center;
-            line-height: 25px;
-            margin-right: 10px;
-            font-weight: bold;
+            margin-top: 40px;
         }
-        
-        .choice-btn:hover .key {
-            background: var(--cyan);
+
+        .action-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            padding: 15px 30px;
+            margin: 0 10px;
+            border: 3px solid;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
-        
-        /* Typing animation */
-        @keyframes blink {
-            50% { opacity: 0; }
+
+        .action-btn.primary {
+            border-color: var(--terminal-green);
+            color: var(--terminal-green);
         }
-        
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 1.2em;
-            background: var(--green);
-            animation: blink 1s step-end infinite;
-            vertical-align: text-bottom;
+
+        .action-btn.primary:hover {
+            background: var(--terminal-green);
+            color: #000;
+            box-shadow: 0 0 20px var(--terminal-green);
         }
-        
-        /* Location visual */
-        #location-visual {
-            width: 100%;
-            height: 150px;
-            background: var(--bg-panel);
-            border: 1px solid var(--green);
-            margin-bottom: 20px;
+
+        .action-btn.secondary {
+            border-color: #555;
+            color: #555;
+        }
+
+        .action-btn.secondary:hover {
+            border-color: #888;
+            color: #888;
+        }
+
+        /* GAME SCREEN */
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.active {
+            display: block;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 100%);
+            border: 3px solid #333;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mini-avatar-frame {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--warning-amber);
+            background: linear-gradient(135deg, #1a1a2e 0%, #0a0a1a 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
             position: relative;
         }
-        
-        .ascii-art {
-            font-family: 'VT323', monospace;
-            font-size: clamp(0.5rem, 1.5vw, 0.8rem);
-            white-space: pre;
-            color: var(--green);
-            text-align: center;
-            line-height: 1.2;
+
+        .mini-avatar-frame::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border: 1px solid rgba(255,191,0,0.3);
         }
-        
-        /* Progress bar */
-        .progress-container {
-            margin: 10px 0;
+
+        .mini-avatar-icon {
+            font-size: 24px;
         }
-        
-        .progress-label {
-            font-size: 0.75rem;
-            color: var(--amber);
-            margin-bottom: 5px;
+
+        .player-info {
+            text-align: left;
         }
-        
-        .progress-bar {
-            height: 8px;
-            background: rgba(57, 255, 20, 0.2);
-            border: 1px solid var(--green);
+
+        .player-name {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            color: var(--terminal-green);
         }
-        
-        .progress-fill {
+
+        .player-class {
+            font-size: 0.9rem;
+            color: var(--hope-cyan);
+            margin-top: 2px;
+        }
+
+        .player-level {
+            font-size: 0.8rem;
+            color: var(--warning-amber);
+            margin-top: 2px;
+        }
+
+        .header-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 180px;
+        }
+
+        .header-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bar-label {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.4rem;
+            width: 25px;
+        }
+
+        .bar-label.hp { color: var(--health-red); }
+        .bar-label.mp { color: var(--mana-blue); }
+        .bar-label.xp { color: var(--xp-purple); }
+
+        .bar-track {
+            flex: 1;
+            height: 12px;
+            background: #111;
+            border: 2px solid #333;
+            position: relative;
+        }
+
+        .bar-fill {
             height: 100%;
-            background: var(--green);
             transition: width 0.5s ease;
         }
-        
-        /* Modal */
-        #modal-overlay {
-            display: none;
-            position: fixed;
+
+        .bar-fill.hp { background: linear-gradient(90deg, #991b1b, var(--health-red)); width: 100%; }
+        .bar-fill.mp { background: linear-gradient(90deg, #1e40af, var(--mana-blue)); width: 85%; }
+        .bar-fill.xp { background: linear-gradient(90deg, #6b21a8, var(--xp-purple)); width: 65%; }
+
+        .bar-text {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7rem;
+            color: #fff;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .header-gold {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #333;
+        }
+
+        .gold-icon {
+            font-size: 20px;
+        }
+
+        .gold-amount {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--warning-amber);
+        }
+
+        .scene-container {
+            background: linear-gradient(180deg, #0d1f2d 0%, #1a2a3a 100%);
+            border: 4px solid #2a3a4a;
+            box-shadow: 
+                inset 0 0 50px rgba(0,255,247,0.05),
+                0 0 30px rgba(0,0,0,0.5);
+            min-height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scene-art {
+            height: 220px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 3px solid #2a3a4a;
+        }
+
+        .pixel-scene {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            image-rendering: pixelated;
+        }
+
+        /* HUB SCENE */
+        .scene-hub .pixel-scene {
+            background: linear-gradient(180deg, 
+                #0a0a2e 0%, 
+                #1a1a4e 50%,
+                #0a0a3a 100%
+            );
+        }
+
+        .hub-floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(180deg, #1a1a3a 0%, #0a0a2a 100%);
+            border-top: 3px solid #3b82f6;
+        }
+
+        .hub-grid {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 999;
+            background-image: 
+                linear-gradient(rgba(59,130,246,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59,130,246,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            transform: perspective(300px) rotateX(60deg);
+            transform-origin: center bottom;
+        }
+
+        .portal-container {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 50px;
+        }
+
+        .portal {
+            width: 60px;
+            height: 80px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .portal:hover {
+            transform: scale(1.1);
+        }
+
+        .portal-frame {
+            position: absolute;
+            inset: 0;
+            border: 4px solid;
+            border-radius: 30px 30px 0 0;
+        }
+
+        .portal-glow {
+            position: absolute;
+            inset: 5px;
+            border-radius: 25px 25px 0 0;
+            animation: portalPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes portalPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .portal-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+        }
+
+        .portal-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.35rem;
+            white-space: nowrap;
+        }
+
+        .portal.digital .portal-frame { border-color: #3b82f6; }
+        .portal.digital .portal-glow { background: radial-gradient(ellipse, rgba(59,130,246,0.6) 0%, transparent 70%); }
+        .portal.digital .portal-label { color: #3b82f6; }
+
+        .portal.curriculum .portal-frame { border-color: #f97316; }
+        .portal.curriculum .portal-glow { background: radial-gradient(ellipse, rgba(249,115,22,0.6) 0%, transparent 70%); }
+        .portal.curriculum .portal-label { color: #f97316; }
+
+        .portal.media .portal-frame { border-color: #a855f7; }
+        .portal.media .portal-glow { background: radial-gradient(ellipse, rgba(168,85,247,0.6) 0%, transparent 70%); }
+        .portal.media .portal-label { color: #a855f7; }
+
+        .portal.field .portal-frame { border-color: #22c55e; }
+        .portal.field .portal-glow { background: radial-gradient(ellipse, rgba(34,197,94,0.6) 0%, transparent 70%); }
+        .portal.field .portal-label { color: #22c55e; }
+
+        .npc-figure {
+            position: absolute;
+            bottom: 15%;
+            right: 15%;
+            text-align: center;
+        }
+
+        .npc-sprite {
+            width: 30px;
+            height: 50px;
+            margin: 0 auto;
+        }
+
+        .npc-head {
+            width: 20px;
+            height: 20px;
+            background: #f4c587;
+            border-radius: 5px;
+            margin: 0 auto;
+            border: 2px solid #d4a574;
+        }
+
+        .npc-body {
+            width: 25px;
+            height: 25px;
+            background: #22c55e;
+            margin: 0 auto;
+            border: 2px solid #15803d;
+        }
+
+        .npc-label {
+            font-size: 0.7rem;
+            color: #22c55e;
+            margin-top: 5px;
+        }
+
+        .npc-quest {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            animation: questBounce 1s ease-in-out infinite;
+        }
+
+        @keyframes questBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-8px); }
+        }
+
+        .dialogue-box {
+            background: rgba(0, 0, 0, 0.95);
+            border: 4px solid var(--hope-cyan);
+            box-shadow: 
+                inset 0 0 20px rgba(0,255,247,0.1),
+                0 0 20px rgba(0,255,247,0.2);
+            padding: 20px;
+            margin: 0;
+            position: relative;
+        }
+
+        .dialogue-box::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 1px solid rgba(0,255,247,0.2);
+            pointer-events: none;
+        }
+
+        .speaker-tag {
+            display: inline-block;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            color: var(--deep-ocean);
+            background: var(--warning-amber);
+            padding: 5px 10px;
+            margin-bottom: 12px;
+        }
+
+        .dialogue-text {
+            font-size: 1.3rem;
+            line-height: 1.7;
+            color: #e0e0e0;
+        }
+
+        .dialogue-text .highlight {
+            color: var(--hope-cyan);
+        }
+
+        .dialogue-text .warning {
+            color: var(--warning-amber);
+        }
+
+        .dialogue-text .quest {
+            color: var(--terminal-green);
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 16px;
+            background: var(--terminal-green);
+            animation: cursorBlink 0.8s step-end infinite;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        @keyframes cursorBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .dialogue-continue {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.4rem;
+            color: #555;
+            animation: continuePulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes continuePulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .choice-menu {
+            padding: 15px;
+            background: rgba(0,0,0,0.8);
+            border-top: 2px solid #333;
+        }
+
+        .menu-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            color: #555;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .choice-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 15px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+            border: 3px solid #333;
+            color: #aaa;
+            font-family: 'VT323', monospace;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+            position: relative;
+        }
+
+        .choice-btn::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            right: 3px;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .choice-btn .icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .choice-btn .label {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .choice-btn .desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .choice-btn.digital { border-left: 4px solid #3b82f6; }
+        .choice-btn.digital:hover { 
+            border-color: #3b82f6; 
+            background: linear-gradient(180deg, rgba(59,130,246,0.2) 0%, rgba(59,130,246,0.05) 100%);
+            box-shadow: 0 5px 20px rgba(59,130,246,0.4), inset 0 0 20px rgba(59,130,246,0.1);
+            color: #fff;
+        }
+
+        .choice-btn.curriculum { border-left: 4px solid #f97316; }
+        .choice-btn.curriculum:hover { 
+            border-color: #f97316; 
+            background: linear-gradient(180deg, rgba(249,115,22,0.2) 0%, rgba(249,115,22,0.05) 100%);
+            box-shadow: 0 5px 20px rgba(249,115,22,0.4), inset 0 0 20px rgba(249,115,22,0.1);
+            color: #fff;
+        }
+
+        .choice-btn.media { border-left: 4px solid #a855f7; }
+        .choice-btn.media:hover { 
+            border-color: #a855f7; 
+            background: linear-gradient(180deg, rgba(168,85,247,0.2) 0%, rgba(168,85,247,0.05) 100%);
+            box-shadow: 0 5px 20px rgba(168,85,247,0.4), inset 0 0 20px rgba(168,85,247,0.1);
+            color: #fff;
+        }
+
+        .choice-btn.field { border-left: 4px solid #22c55e; }
+        .choice-btn.field:hover { 
+            border-color: #22c55e; 
+            background: linear-gradient(180deg, rgba(34,197,94,0.2) 0%, rgba(34,197,94,0.05) 100%);
+            box-shadow: 0 5px 20px rgba(34,197,94,0.4), inset 0 0 20px rgba(34,197,94,0.1);
+            color: #fff;
+        }
+
+        .choice-btn.contact { border-left: 4px solid var(--hope-cyan); }
+        .choice-btn.contact:hover { 
+            border-color: var(--hope-cyan); 
+            background: linear-gradient(180deg, rgba(0,255,247,0.2) 0%, rgba(0,255,247,0.05) 100%);
+            box-shadow: 0 5px 20px rgba(0,255,247,0.4), inset 0 0 20px rgba(0,255,247,0.1);
+            color: #fff;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        /* QUEST LOG STYLE PROJECTS */
+        .quest-log {
+            padding: 15px;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .quest-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+        }
+
+        .quest-header-icon {
+            font-size: 24px;
+        }
+
+        .quest-header h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--warning-amber);
+        }
+
+        .quest-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quest-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.3) 0%, transparent 100%);
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .quest-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .quest-item.main::before { background: var(--warning-amber); }
+        .quest-item.side::before { background: #666; }
+        .quest-item.complete::before { background: var(--terminal-green); }
+
+        .quest-item:hover {
+            border-color: var(--hope-cyan);
+            background: linear-gradient(90deg, rgba(0,255,247,0.1) 0%, transparent 100%);
+            transform: translateX(5px);
+        }
+
+        .quest-icon {
+            font-size: 1.8rem;
+            width: 50px;
+            text-align: center;
+        }
+
+        .quest-info {
+            flex: 1;
+        }
+
+        .quest-type {
+            font-size: 0.7rem;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+        .quest-item.main .quest-type { color: var(--warning-amber); }
+        .quest-item.complete .quest-type { color: var(--terminal-green); }
+
+        .quest-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            color: #ddd;
+            margin-bottom: 5px;
+        }
+
+        .quest-desc {
+            font-size: 1.1rem;
+            color: #888;
+        }
+
+        .quest-rewards {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .reward {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .reward-icon {
+            font-size: 14px;
+        }
+
+        .quest-arrow {
+            color: #333;
+            font-size: 1.5rem;
+            transition: all 0.15s ease;
+        }
+
+        .quest-item:hover .quest-arrow {
+            color: var(--hope-cyan);
+            transform: translateX(5px);
+        }
+
+        /* DETAIL VIEW */
+        .detail-content {
+            padding: 20px;
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333;
+        }
+
+        .detail-icon {
+            font-size: 3rem;
+        }
+
+        .detail-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: var(--warning-amber);
+            margin-bottom: 5px;
+        }
+
+        .detail-subtitle {
+            font-size: 1.2rem;
+            color: #888;
+        }
+
+        .quest-status {
+            margin-left: auto;
+            padding: 8px 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.4rem;
+            border: 2px solid var(--terminal-green);
+            color: var(--terminal-green);
+        }
+
+        .detail-body {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #ccc;
+        }
+
+        .detail-body p {
+            margin-bottom: 15px;
+        }
+
+        .loot-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #333;
+        }
+
+        .loot-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            color: var(--hope-cyan);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill-tag {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.4rem;
+            padding: 8px 12px;
+            background: rgba(0,255,247,0.1);
+            border: 2px solid var(--hope-cyan);
+            color: var(--hope-cyan);
+            position: relative;
+        }
+
+        .skill-tag::before {
+            content: '+';
+            margin-right: 5px;
+            color: var(--terminal-green);
+        }
+
+        /* NAV BUTTONS */
+        .nav-row {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(0,0,0,0.5);
+            border-top: 2px solid #333;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 12px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            background: transparent;
+            border: 3px solid #444;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--hope-cyan);
+            color: var(--hope-cyan);
+        }
+
+        .nav-btn.primary {
+            border-color: var(--warning-amber);
+            color: var(--warning-amber);
+        }
+
+        .nav-btn.primary:hover {
+            background: var(--warning-amber);
+            color: var(--deep-ocean);
+            box-shadow: 0 0 20px rgba(255,191,0,0.5);
+        }
+
+        /* SCENE SPECIFICS */
+        
+        /* Digital Scene */
+        .scene-digital .pixel-scene {
+            background: linear-gradient(180deg, #050520 0%, #0a0a3a 100%);
+        }
+
+        .digital-room {
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            right: 10%;
+            height: 60%;
+            background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            border: 3px solid #1e3a5f;
+            border-bottom: none;
+        }
+
+        .server-rack {
+            position: absolute;
+            right: 10%;
+            bottom: 20%;
+            display: flex;
+            gap: 5px;
+        }
+
+        .server {
+            width: 20px;
+            height: 60px;
+            background: #1e293b;
+            border: 2px solid #334155;
+        }
+
+        .server-light {
+            width: 6px;
+            height: 6px;
+            background: var(--terminal-green);
+            margin: 5px auto;
+            animation: serverBlink 1s infinite;
+        }
+
+        .server:nth-child(2) .server-light { animation-delay: 0.3s; }
+        .server:nth-child(3) .server-light { animation-delay: 0.6s; }
+
+        @keyframes serverBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .workstation {
+            position: absolute;
+            bottom: 10%;
+            left: 20%;
+        }
+
+        .desk {
+            width: 120px;
+            height: 8px;
+            background: #4a3728;
+            border: 2px solid #3a2a1a;
+        }
+
+        .monitor {
+            width: 80px;
+            height: 50px;
+            background: #1a1a2e;
+            border: 4px solid #333;
+            margin: 0 auto;
+            margin-bottom: -5px;
+            position: relative;
+        }
+
+        .monitor-screen {
+            position: absolute;
+            inset: 3px;
+            background: #0a0a1a;
+            overflow: hidden;
+        }
+
+        .code-lines {
+            padding: 3px;
+        }
+
+        .code-line {
+            height: 3px;
+            background: var(--terminal-green);
+            margin: 3px 0;
+            animation: codePulse 2s infinite;
+        }
+
+        .code-line:nth-child(1) { width: 80%; animation-delay: 0s; }
+        .code-line:nth-child(2) { width: 60%; animation-delay: 0.2s; }
+        .code-line:nth-child(3) { width: 90%; animation-delay: 0.4s; }
+        .code-line:nth-child(4) { width: 40%; animation-delay: 0.6s; }
+
+        @keyframes codePulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .floating-data {
+            position: absolute;
+            top: 15%;
+            left: 10%;
+            right: 10%;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .data-orb {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            animation: orbFloat 3s ease-in-out infinite;
+        }
+
+        .data-orb:nth-child(1) { 
+            background: radial-gradient(circle, rgba(59,130,246,0.6) 0%, transparent 70%);
+            animation-delay: 0s;
+        }
+        .data-orb:nth-child(2) { 
+            background: radial-gradient(circle, rgba(168,85,247,0.6) 0%, transparent 70%);
+            animation-delay: 0.5s;
+        }
+        .data-orb:nth-child(3) { 
+            background: radial-gradient(circle, rgba(34,197,94,0.6) 0%, transparent 70%);
+            animation-delay: 1s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(180deg); }
+        }
+
+        /* Curriculum Scene */
+        .scene-curriculum .pixel-scene {
+            background: linear-gradient(180deg, #1a0a0a 0%, #2a1a1a 100%);
+        }
+
+        .workshop-room {
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            right: 5%;
+            height: 70%;
+            background: linear-gradient(180deg, #292524 0%, #1c1917 100%);
+            border: 3px solid #44403c;
+            border-bottom: none;
+        }
+
+        .blueprint-table {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 80px;
+            background: #1e40af;
+            border: 3px solid #3b82f6;
+            overflow: hidden;
+        }
+
+        .blueprint-grid {
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 15px 15px;
+        }
+
+        .blueprint-shapes {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        .bp-shape {
+            position: absolute;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+
+        .bp-shape:nth-child(1) {
+            width: 30px;
+            height: 20px;
+        }
+
+        .bp-shape:nth-child(2) {
+            width: 20px;
+            height: 30px;
+            left: 40px;
+        }
+
+        .tools-rack {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tool {
+            font-size: 20px;
+            animation: toolSwing 3s ease-in-out infinite;
+        }
+
+        @keyframes toolSwing {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        /* Media Scene */
+        .scene-media .pixel-scene {
+            background: linear-gradient(180deg, #1a0a1a 0%, #2a1a2a 100%);
+        }
+
+        .studio-room {
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            right: 5%;
+            height: 65%;
+            background: linear-gradient(180deg, #1f1f3a 0%, #0f0f2a 100%);
+            border: 3px solid #4c1d95;
+            border-bottom: none;
+        }
+
+        .sound-booth {
+            position: absolute;
+            left: 10%;
+            bottom: 10%;
+            width: 60px;
+            height: 80px;
+            background: #1e1e3e;
+            border: 3px solid #333;
+        }
+
+        .mic-stand {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .mic-base {
+            width: 20px;
+            height: 4px;
+            background: #555;
+            margin: 0 auto;
+        }
+
+        .mic-pole {
+            width: 4px;
+            height: 30px;
+            background: #555;
+            margin: 0 auto;
+        }
+
+        .mic-head {
+            width: 15px;
+            height: 20px;
+            background: #333;
+            border: 2px solid #555;
+            border-radius: 5px 5px 0 0;
+            margin: 0 auto;
+        }
+
+        .waveform-display {
+            position: absolute;
+            top: 20%;
+            left: 30%;
+            right: 10%;
+            height: 40px;
+            background: #0a0a1a;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 5px;
+        }
+
+        .wave-bar {
+            width: 4px;
+            background: #a855f7;
+            animation: waveAnim 0.8s ease-in-out infinite;
+        }
+
+        @keyframes waveAnim {
+            0%, 100% { height: 10px; }
+            50% { height: 30px; }
+        }
+
+        .wave-bar:nth-child(1) { animation-delay: 0s; }
+        .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(6) { animation-delay: 0.15s; }
+        .wave-bar:nth-child(7) { animation-delay: 0.25s; }
+        .wave-bar:nth-child(8) { animation-delay: 0.05s; }
+        .wave-bar:nth-child(9) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(10) { animation-delay: 0.1s; }
+
+        .rec-indicator {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rec-dot {
+            width: 12px;
+            height: 12px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: recPulse 1s infinite;
+        }
+
+        @keyframes recPulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 10px #ef4444; }
+            50% { opacity: 0.3; box-shadow: none; }
+        }
+
+        .rec-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            color: #ef4444;
+        }
+
+        /* Field Scene */
+        .scene-field .pixel-scene {
+            background: linear-gradient(180deg, 
+                #1e3a5f 0%,
+                #87ceeb 20%, 
+                #98d8c8 50%,
+                #228b22 75%,
+                #1a4a1a 100%
+            );
+        }
+
+        .sun {
+            position: absolute;
+            top: 8%;
+            right: 15%;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ffd700 0%, #ff8c00 50%, transparent 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(255,215,0,0.5);
+        }
+
+        .mountains {
+            position: absolute;
+            bottom: 35%;
+            left: 0;
+            right: 0;
+            height: 100px;
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+        }
+
+        .mountain.back {
+            border-bottom: 70px solid #4a5568;
+        }
+
+        .mountain.front {
+            border-bottom: 90px solid #374151;
+        }
+
+        .mountain-snow {
+            position: absolute;
+            top: -85px;
+            left: -15px;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 20px solid white;
+        }
+
+        .trees-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 35%;
+        }
+
+        .tree {
+            position: absolute;
+            bottom: 0;
+        }
+
+        .tree-trunk {
+            width: 8px;
+            height: 20px;
+            background: #5d4037;
+            margin: 0 auto;
+        }
+
+        .tree-leaves {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid #228b22;
+            margin-bottom: -5px;
+        }
+
+        .tree-leaves:nth-child(2) {
+            border-bottom-color: #2d8a2d;
+            transform: scale(0.8);
+        }
+
+        .path {
+            position: absolute;
+            bottom: 0;
+            left: 40%;
+            width: 20%;
+            height: 30%;
+            background: linear-gradient(180deg, transparent 0%, #8b7355 50%, #6b5344 100%);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
+        }
+
+        /* Contact Scene */
+        .scene-contact .pixel-scene {
+            background: linear-gradient(180deg, #0a1a0a 0%, #1a2a1a 100%);
+        }
+
+        .comm-station {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .comm-console {
+            width: 120px;
+            height: 60px;
+            background: #1a1a2e;
+            border: 4px solid #333;
+            position: relative;
+        }
+
+        .comm-screen {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            height: 35px;
+            background: #0a0a1a;
+            border: 2px solid #222;
+            display: flex;
             align-items: center;
             justify-content: center;
         }
-        
-        #modal-content {
-            background: var(--bg-panel);
-            border: 2px solid var(--cyan);
-            padding: 30px;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            margin: 20px;
+
+        .signal-wave {
+            width: 60%;
+            height: 2px;
+            background: var(--hope-cyan);
+            position: relative;
+            animation: signalPulse 1.5s ease-in-out infinite;
         }
-        
-        #modal-content h2 {
-            font-family: 'VT323', monospace;
-            color: var(--cyan);
-            margin-bottom: 15px;
+
+        @keyframes signalPulse {
+            0%, 100% { transform: scaleY(1); }
+            25% { transform: scaleY(3); }
+            50% { transform: scaleY(1); }
+            75% { transform: scaleY(2); }
         }
-        
-        #modal-content p {
-            margin-bottom: 10px;
-            line-height: 1.6;
+
+        .comm-buttons {
+            position: absolute;
+            bottom: 5px;
+            left: 10px;
+            display: flex;
+            gap: 5px;
         }
-        
-        .close-modal {
-            display: block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: var(--cyan);
-            color: var(--bg-dark);
-            border: none;
-            font-family: 'Space Mono', monospace;
-            cursor: pointer;
+
+        .comm-btn {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
         }
-        
-        /* Contact footer */
-        #contact-bar {
-            margin-top: 30px;
+
+        .comm-btn:nth-child(1) { background: var(--terminal-green); }
+        .comm-btn:nth-child(2) { background: var(--warning-amber); }
+        .comm-btn:nth-child(3) { background: var(--health-red); }
+
+        .satellite {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: satelliteFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes satelliteFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+            50% { transform: translateX(-50%) translateY(-10px) rotate(5deg); }
+        }
+
+        .sat-body {
+            width: 30px;
+            height: 20px;
+            background: #555;
+            border: 2px solid #777;
+            position: relative;
+        }
+
+        .sat-panel {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 25px;
+            height: 35px;
+            background: linear-gradient(90deg, #1e40af 0%, #3b82f6 50%, #1e40af 100%);
+            border: 2px solid #60a5fa;
+        }
+
+        .sat-panel.left { right: 100%; }
+        .sat-panel.right { left: 100%; }
+
+        .signal-rings {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .ring {
+            position: absolute;
+            border: 2px solid var(--hope-cyan);
+            border-radius: 50%;
+            animation: ringExpand 3s ease-out infinite;
+            opacity: 0;
+        }
+
+        .ring:nth-child(1) { animation-delay: 0s; }
+        .ring:nth-child(2) { animation-delay: 1s; }
+        .ring:nth-child(3) { animation-delay: 2s; }
+
+        @keyframes ringExpand {
+            0% { width: 40px; height: 40px; margin: -20px; opacity: 0.8; }
+            100% { width: 120px; height: 120px; margin: -60px; opacity: 0; }
+        }
+
+        .contact-details {
             padding: 20px;
-            background: var(--bg-panel);
-            border: 1px solid var(--magenta);
-            text-align: center;
+            background: rgba(0,0,0,0.5);
         }
-        
-        #contact-bar a {
-            color: var(--magenta);
-            margin: 0 15px;
+
+        .contact-line {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(0,255,247,0.05);
+            border: 2px solid #333;
+            border-left: 4px solid var(--hope-cyan);
+            transition: all 0.15s ease;
+        }
+
+        .contact-line:hover {
+            background: rgba(0,255,247,0.1);
+            border-color: var(--hope-cyan);
+            transform: translateX(5px);
+        }
+
+        .contact-line .icon {
+            font-size: 1.5rem;
+        }
+
+        .contact-line a {
+            color: var(--hope-cyan);
             text-decoration: none;
-            transition: color 0.2s;
-        }
-        
-        #contact-bar a:hover {
-            color: var(--cyan);
-        }
-        
-        /* Glitch effect for titles */
-        @keyframes glitch {
-            0% { text-shadow: 2px 0 var(--magenta), -2px 0 var(--cyan); }
-            25% { text-shadow: -2px 0 var(--magenta), 2px 0 var(--cyan); }
-            50% { text-shadow: 2px 0 var(--cyan), -2px 0 var(--magenta); }
-            75% { text-shadow: -2px 0 var(--cyan), 2px 0 var(--magenta); }
-            100% { text-shadow: 2px 0 var(--magenta), -2px 0 var(--cyan); }
-        }
-        
-        .glitch {
-            animation: glitch 0.3s infinite;
-        }
-        
-        /* Weather widget */
-        #weather-widget {
-            font-size: 0.75rem;
-            padding: 10px;
-            background: rgba(255, 107, 107, 0.1);
-            border-left: 3px solid var(--coral);
-            margin-bottom: 10px;
-        }
-        
-        /* Start screen */
-        #start-screen {
-            text-align: center;
-            padding: 50px 20px;
-        }
-        
-        #start-screen h1 {
-            font-family: 'VT323', monospace;
-            font-size: clamp(2rem, 8vw, 4rem);
-            color: var(--cyan);
-            text-shadow: 0 0 20px var(--cyan);
-            margin-bottom: 20px;
-        }
-        
-        #start-screen .tagline {
-            font-size: 1.1rem;
-            color: var(--amber);
-            margin-bottom: 30px;
-        }
-        
-        #start-btn {
-            padding: 15px 40px;
             font-size: 1.2rem;
+        }
+
+        .contact-line a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-line span {
+            color: var(--hope-cyan);
+            font-size: 1.2rem;
+        }
+
+        .scene {
+            display: none;
+        }
+
+        .scene.active {
+            display: block;
+        }
+
+        /* Quick nav */
+        .quick-nav {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            padding: 15px;
+            flex-wrap: wrap;
+            background: rgba(0,0,0,0.3);
+            border-top: 2px solid #222;
+        }
+
+        .quick-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.4rem;
+            padding: 8px 12px;
             background: transparent;
-            border: 2px solid var(--green);
-            color: var(--green);
-            font-family: 'VT323', monospace;
+            border: 2px solid #333;
+            color: #555;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.15s ease;
         }
-        
-        #start-btn:hover {
-            background: var(--green);
-            color: var(--bg-dark);
-            transform: scale(1.05);
+
+        .quick-btn:hover {
+            border-color: var(--hope-cyan);
+            color: var(--hope-cyan);
+            box-shadow: 0 0 10px rgba(0,255,247,0.3);
         }
-        
-        .hidden { display: none !important; }
-        
-        /* Achievement popup */
-        #achievement {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--bg-panel);
-            border: 2px solid var(--amber);
-            padding: 15px 20px;
-            transform: translateX(150%);
-            transition: transform 0.5s ease;
-            z-index: 1001;
-        }
-        
-        #achievement.show {
-            transform: translateX(0);
-        }
-        
-        #achievement .ach-title {
-            color: var(--amber);
-            font-family: 'VT323', monospace;
-            font-size: 1.1rem;
-        }
-        
-        #achievement .ach-desc {
+
+        /* Inventory popup */
+        .inventory-hint {
+            text-align: center;
+            padding: 10px;
             font-size: 0.8rem;
-            color: var(--green);
+            color: #444;
+        }
+
+        @media (max-width: 600px) {
+            .game-title {
+                font-size: 1rem;
+            }
+            
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: span 1;
+            }
+
+            .header-bars {
+                display: none;
+            }
+
+            .header-gold {
+                display: none;
+            }
+
+            .scene-art {
+                height: 150px;
+            }
+
+            .portal-container {
+                gap: 25px;
+            }
+
+            .portal {
+                width: 45px;
+                height: 60px;
+            }
+
+            .portal-icon {
+                font-size: 18px;
+            }
+
+            .portal-label {
+                font-size: 0.3rem;
+            }
+
+            .char-display {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .stat-card {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <!-- Start Screen -->
-        <div id="start-screen">
-            <div class="ascii-art" style="color: var(--cyan); margin-bottom: 20px;">
-    ╔═══════════════════════════════════════════════════════════════╗
-    ║  ██╗  ██╗██╗██████╗ ██████╗ ██╗   ██╗     ██████╗            ║
-    ║  ██║ ██╔╝██║██╔══██╗██╔══██╗╚██╗ ██╔╝    ██╔════╝            ║
-    ║  █████╔╝ ██║██████╔╝██████╔╝ ╚████╔╝     ██║                 ║
-    ║  ██╔═██╗ ██║██╔══██╗██╔══██╗  ╚██╔╝      ██║                 ║
-    ║  ██║  ██╗██║██║  ██║██████╔╝   ██║       ╚██████╗            ║
-    ║  ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝    ╚═╝        ╚═════╝            ║
-    ╚═══════════════════════════════════════════════════════════════╝
-            </div>
-            <h1 class="glitch">LEARNING ARCHITECT<br>OF THE ANTHROPOCENE</h1>
-            <p class="tagline">A Text Adventure Through a Climate-Changed Future</p>
-            <p style="color: var(--green); margin-bottom: 30px; font-size: 0.9rem;">
-                The year is 2047. The world survived—barely.<br>
-                Now it needs people who can help it learn, adapt, and rebuild.<br>
-                People like <span class="highlight">Kirby Crider</span>.
-            </p>
-            <button id="start-btn">[ INITIALIZE SIMULATION ]</button>
-            <p style="margin-top: 30px; font-size: 0.75rem; color: var(--amber);">
-                An interactive portfolio experience<br>
-                kirby.crider@gmail.com | 919-357-1797
-            </p>
-        </div>
-        
-        <!-- Game Screen -->
-        <div id="game-screen" class="hidden">
-            <div id="header">
-                <h1>KIRBY CRIDER: LEARNING ARCHITECT</h1>
-                <div class="subtitle">Global Capacity Coordination Network | Year 2047</div>
-            </div>
-            
-            <div id="status-bar">
-                <div class="stat">
-                    <span class="stat-label">LOCATION:</span>
-                    <span class="stat-value" id="current-location">Charlottesville Hub</span>
+    <div class="game-wrapper">
+        <div class="container">
+
+            <!-- TITLE SCREEN -->
+            <div class="title-screen" id="title-screen">
+                <div class="stars">
+                    <div class="star" style="top: 10%; left: 20%;"></div>
+                    <div class="star" style="top: 15%; left: 80%; animation-delay: 0.5s;"></div>
+                    <div class="star" style="top: 30%; left: 10%; animation-delay: 1s;"></div>
+                    <div class="star" style="top: 25%; left: 60%; animation-delay: 0.3s;"></div>
+                    <div class="star" style="top: 40%; left: 90%; animation-delay: 0.8s;"></div>
+                    <div class="star" style="top: 50%; left: 5%; animation-delay: 1.2s;"></div>
+                    <div class="star" style="top: 60%; left: 75%; animation-delay: 0.2s;"></div>
+                    <div class="star" style="top: 70%; left: 30%; animation-delay: 0.7s;"></div>
+                    <div class="star" style="top: 80%; left: 85%; animation-delay: 1.5s;"></div>
+                    <div class="star" style="top: 85%; left: 15%; animation-delay: 0.4s;"></div>
                 </div>
-                <div class="stat">
-                    <span class="stat-label">YEAR:</span>
-                    <span class="stat-value" id="current-year">2047</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">TRUST:</span>
-                    <span class="stat-value" id="trust-level">●●●○○</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">IMPACT:</span>
-                    <span class="stat-value" id="impact-score">0</span>
-                </div>
-            </div>
-            
-            <div id="location-visual">
-                <pre class="ascii-art" id="ascii-display"></pre>
-            </div>
-            
-            <div id="main-display">
-                <div id="narrative-column">
-                    <div id="narrative-panel"></div>
-                    <div id="choices-panel">
-                        <h3>> AVAILABLE ACTIONS</h3>
-                        <div id="choices-container"></div>
+                <div class="title-art">
+                    <div class="pixel-avatar">
+                        <div class="avatar-glow"></div>
+                        <div class="avatar-sprite">
+                            <div class="avatar-head">
+                                <div class="avatar-eyes">
+                                    <div class="eye"></div>
+                                    <div class="eye"></div>
+                                </div>
+                            </div>
+                            <div class="avatar-body">
+                                <div class="avatar-cape"></div>
+                            </div>
+                            <div class="avatar-legs">
+                                <div class="leg"></div>
+                                <div class="leg"></div>
+                            </div>
+                        </div>
+                        <div class="class-badge">LV 15 ARCHITECT</div>
                     </div>
                 </div>
-                
-                <div id="side-panel">
-                    <div class="panel-section">
-                        <div class="panel-title">// WEATHER ADVISORY</div>
-                        <div id="weather-widget">
-                            ATMOSPHERIC CO₂: 485ppm<br>
-                            TEMP ANOMALY: +2.1°C<br>
-                            STATUS: Adaptation protocols active
+                <h1 class="game-title">KIRBY CRIDER</h1>
+                <p class="game-subtitle">THE LEARNING OPERATIVE</p>
+                <p class="title-tagline">
+                    Designing learning experiences for social impact, behavior change, conservation, and natural resource management
+                </p>
+                <div class="menu-options">
+                    <button class="menu-option selected" onclick="showCharSelect()">NEW GAME</button>
+                    <button class="menu-option" onclick="startGame()">CONTINUE</button>
+                    <button class="menu-option" onclick="goToScene('contact'); startGame();">OPTIONS</button>
+                </div>
+                <p class="copyright">© 2025 CRIDER INTERACTIVE • v1.0</p>
+            </div>
+
+            <!-- CHARACTER SELECT SCREEN -->
+            <div class="char-select" id="char-select">
+                <div class="char-header">
+                    <h2>— CHARACTER PROFILE —</h2>
+                    <p>Review stats and abilities before embarking</p>
+                </div>
+                <div class="char-display">
+                    <div class="char-model">
+                        <div class="large-avatar pixel-avatar">
+                            <div class="avatar-glow"></div>
+                            <div class="avatar-sprite">
+                                <div class="avatar-head">
+                                    <div class="avatar-eyes">
+                                        <div class="eye"></div>
+                                        <div class="eye"></div>
+                                    </div>
+                                </div>
+                                <div class="avatar-body">
+                                    <div class="avatar-cape"></div>
+                                </div>
+                                <div class="avatar-legs">
+                                    <div class="leg"></div>
+                                    <div class="leg"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="char-name">KIRBY CRIDER</div>
+                        <div class="char-class">Learning Architect</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>— BASE STATS —</h3>
+                        <div class="stat-row">
+                            <span class="stat-name">DESIGN</span>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar-fill str" style="width: 90%;"></div>
+                            </div>
+                            <span class="stat-value">18</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">TECHNICAL</span>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar-fill int" style="width: 80%;"></div>
+                            </div>
+                            <span class="stat-value">16</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">FACILITATION</span>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar-fill wis" style="width: 85%;"></div>
+                            </div>
+                            <span class="stat-value">17</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">STORYTELLING</span>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar-fill cha" style="width: 85%;"></div>
+                            </div>
+                            <span class="stat-value">17</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">ADAPTABILITY</span>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar-fill dex" style="width: 75%;"></div>
+                            </div>
+                            <span class="stat-value">15</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">FIELD OPS</span>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar-fill end" style="width: 80%;"></div>
+                            </div>
+                            <span class="stat-value">16</span>
+                        </div>
+                        <div class="abilities-section">
+                            <h4>⚔️ EQUIPPED ABILITIES</h4>
+                            <span class="ability-tag">Backward Design</span>
+                            <span class="ability-tag">Scenario Building</span>
+                            <span class="ability-tag">Cross-Cultural +3</span>
+                            <span class="ability-tag">Systems Thinking</span>
                         </div>
                     </div>
-                    
-                    <div class="panel-section">
-                        <div class="panel-title">// CAPABILITIES LOADED</div>
-                        <div id="inventory-list"></div>
+                </div>
+                <div class="char-actions">
+                    <button class="action-btn secondary" onclick="backToTitle()">← BACK</button>
+                    <button class="action-btn primary" onclick="startGame()">BEGIN QUEST →</button>
+                </div>
+            </div>
+
+            <!-- GAME SCREEN -->
+            <div class="game-screen" id="game-screen">
+                
+                <header class="game-header">
+                    <div class="header-left">
+                        <div class="mini-avatar-frame">
+                            <span class="mini-avatar-icon">🧙</span>
+                        </div>
+                        <div class="player-info">
+                            <div class="player-name">KIRBY CRIDER</div>
+                            <div class="player-class">Learning Architect</div>
+                            <div class="player-level">⭐ LEVEL 15</div>
+                        </div>
                     </div>
-                    
-                    <div class="panel-section">
-                        <div class="panel-title">// MISSION LOG</div>
-                        <div id="mission-log"></div>
-                        <div class="progress-container">
-                            <div class="progress-label">Portfolio Discovery: <span id="discovery-pct">0</span>%</div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="discovery-bar" style="width: 0%"></div>
+                    <div class="header-bars">
+                        <div class="header-bar">
+                            <span class="bar-label hp">HP</span>
+                            <div class="bar-track">
+                                <div class="bar-fill hp"></div>
+                                <span class="bar-text">100/100</span>
+                            </div>
+                        </div>
+                        <div class="header-bar">
+                            <span class="bar-label mp">MP</span>
+                            <div class="bar-track">
+                                <div class="bar-fill mp"></div>
+                                <span class="bar-text">85/100</span>
+                            </div>
+                        </div>
+                        <div class="header-bar">
+                            <span class="bar-label xp">XP</span>
+                            <div class="bar-track">
+                                <div class="bar-fill xp"></div>
+                                <span class="bar-text">6500</span>
                             </div>
                         </div>
                     </div>
+                    <div class="header-gold">
+                        <span class="gold-icon">💎</span>
+                        <span class="gold-amount">12,450</span>
+                    </div>
+                </header>
+
+                <div class="scene-container">
+
+                    <!-- HUB SCENE -->
+                    <div class="scene scene-hub active" id="scene-hub">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="hub-floor">
+                                    <div class="hub-grid"></div>
+                                </div>
+                                <div class="portal-container">
+                                    <div class="portal digital" onclick="goToScene('digital')">
+                                        <div class="portal-frame"></div>
+                                        <div class="portal-glow"></div>
+                                        <span class="portal-icon">💻</span>
+                                        <span class="portal-label">DIGITAL</span>
+                                    </div>
+                                    <div class="portal curriculum" onclick="goToScene('curriculum')">
+                                        <div class="portal-frame"></div>
+                                        <div class="portal-glow"></div>
+                                        <span class="portal-icon">📐</span>
+                                        <span class="portal-label">CURRICULUM</span>
+                                    </div>
+                                    <div class="portal media" onclick="goToScene('media')">
+                                        <div class="portal-frame"></div>
+                                        <div class="portal-glow"></div>
+                                        <span class="portal-icon">🎙️</span>
+                                        <span class="portal-label">MEDIA</span>
+                                    </div>
+                                    <div class="portal field" onclick="goToScene('field')">
+                                        <div class="portal-frame"></div>
+                                        <div class="portal-glow"></div>
+                                        <span class="portal-icon">🌍</span>
+                                        <span class="portal-label">FIELD</span>
+                                    </div>
+                                </div>
+                                <div class="npc-figure">
+                                    <div class="npc-quest">❗</div>
+                                    <div class="npc-sprite">
+                                        <div class="npc-head"></div>
+                                        <div class="npc-body"></div>
+                                    </div>
+                                    <div class="npc-label">GUIDE</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dialogue-box">
+                            <div class="speaker-tag">GUILD MASTER</div>
+                            <div class="dialogue-text">
+                                Welcome back, <span class="highlight">Operative</span>. Your completed quests are catalogued in each realm. Select a <span class="quest">portal</span> to review your achievements, or establish contact with the Guild.<span class="cursor"></span>
+                            </div>
+                            <span class="dialogue-continue">▼ SELECT DESTINATION</span>
+                        </div>
+                        <div class="choice-menu">
+                            <div class="menu-title">— SELECT REALM —</div>
+                            <div class="menu-grid">
+                                <button class="choice-btn digital" onclick="goToScene('digital')">
+                                    <span class="icon">💻</span>
+                                    <span class="label">DIGITAL REALM</span>
+                                    <span class="desc">eLearning & Virtual</span>
+                                </button>
+                                <button class="choice-btn curriculum" onclick="goToScene('curriculum')">
+                                    <span class="icon">📐</span>
+                                    <span class="label">DESIGN FORGE</span>
+                                    <span class="desc">Program Architecture</span>
+                                </button>
+                                <button class="choice-btn media" onclick="goToScene('media')">
+                                    <span class="icon">🎙️</span>
+                                    <span class="label">MEDIA SANCTUM</span>
+                                    <span class="desc">Audio & Video</span>
+                                </button>
+                                <button class="choice-btn field" onclick="goToScene('field')">
+                                    <span class="icon">🌍</span>
+                                    <span class="label">FIELD TERRITORIES</span>
+                                    <span class="desc">Expeditions & Workshops</span>
+                                </button>
+                                <button class="choice-btn contact full-width" onclick="goToScene('contact')">
+                                    <span class="icon">📡</span>
+                                    <span class="label">CONTACT THE GUILD</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DIGITAL SCENE -->
+                    <div class="scene scene-digital" id="scene-digital">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="digital-room"></div>
+                                <div class="floating-data">
+                                    <div class="data-orb">📊</div>
+                                    <div class="data-orb">🔮</div>
+                                    <div class="data-orb">⚡</div>
+                                </div>
+                                <div class="workstation">
+                                    <div class="monitor">
+                                        <div class="monitor-screen">
+                                            <div class="code-lines">
+                                                <div class="code-line"></div>
+                                                <div class="code-line"></div>
+                                                <div class="code-line"></div>
+                                                <div class="code-line"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="desk"></div>
+                                </div>
+                                <div class="server-rack">
+                                    <div class="server"><div class="server-light"></div></div>
+                                    <div class="server"><div class="server-light"></div></div>
+                                    <div class="server"><div class="server-light"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dialogue-box">
+                            <div class="speaker-tag">DIGITAL REALM</div>
+                            <div class="dialogue-text">
+                                The realm of <span class="highlight">interactive eLearning</span>, branching scenarios, and virtual delivery systems. Review completed quests below.<span class="cursor"></span>
+                            </div>
+                        </div>
+                        <div class="quest-log">
+                            <div class="quest-header">
+                                <span class="quest-header-icon">📜</span>
+                                <h3>QUEST LOG — DIGITAL</h3>
+                            </div>
+                            <div class="quest-list">
+                                <div class="quest-item complete" onclick="goToScene('digital-nrc')">
+                                    <div class="quest-icon">🔍</div>
+                                    <div class="quest-info">
+                                        <div class="quest-type">★ MAIN QUEST — COMPLETE</div>
+                                        <div class="quest-title">NR CRIMES INVESTIGATION</div>
+                                        <div class="quest-desc">Branching Storyline course with live webinar delivery</div>
+                                        <div class="quest-rewards">
+                                            <span class="reward"><span class="reward-icon">⚡</span> +500 XP</span>
+                                            <span class="reward"><span class="reward-icon">🎯</span> Scenario Design</span>
+                                        </div>
+                                    </div>
+                                    <div class="quest-arrow">▶</div>
+                                </div>
+                                <div class="quest-item complete" onclick="goToScene('digital-skills')">
+                                    <div class="quest-icon">⚔️</div>
+                                    <div class="quest-info">
+                                        <div class="quest-type">★ ABILITIES UNLOCKED</div>
+                                        <div class="quest-title">TECHNICAL TOOLKIT</div>
+                                        <div class="quest-desc">eLearning development capabilities acquired</div>
+                                        <div class="quest-rewards">
+                                            <span class="reward"><span class="reward-icon">🛡️</span> +8 Skills</span>
+                                        </div>
+                                    </div>
+                                    <div class="quest-arrow">▶</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('hub')">← RETURN TO HUB</button>
+                            <button class="nav-btn" onclick="goToScene('curriculum')">NEXT REALM →</button>
+                        </div>
+                    </div>
+
+                    <!-- DIGITAL: NRC DETAIL -->
+                    <div class="scene scene-digital" id="scene-digital-nrc">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="digital-room"></div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px;">🔍</div>
+                            </div>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-header">
+                                <div class="detail-icon">🔍</div>
+                                <div>
+                                    <div class="detail-title">NR CRIMES INVESTIGATION COURSE</div>
+                                    <div class="detail-subtitle">Branching scenario with live delivery</div>
+                                </div>
+                                <div class="quest-status">✓ COMPLETE</div>
+                            </div>
+                            <div class="detail-body">
+                                <p>A <span style="color: var(--hope-cyan);">branching-scenario Storyline course</span> where learners play as investigators making real decisions about natural resource crime cases.</p>
+                                <p>The innovation: delivered <span style="color: var(--warning-amber);">live during webinars</span>—one participant shares their screen while the group collectively debates each decision point. This hybrid model combines social learning dynamics with self-paced interactivity.</p>
+                            </div>
+                            <div class="loot-section">
+                                <div class="loot-title">🎁 SKILLS ACQUIRED</div>
+                                <div class="skill-list">
+                                    <span class="skill-tag">STORYLINE 360</span>
+                                    <span class="skill-tag">BRANCHING LOGIC</span>
+                                    <span class="skill-tag">VIRTUAL FACILITATION</span>
+                                    <span class="skill-tag">SCENARIO DESIGN</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('digital')">← BACK</button>
+                            <button class="nav-btn primary" onclick="goToScene('hub')">RETURN TO HUB</button>
+                        </div>
+                    </div>
+
+                    <!-- DIGITAL: SKILLS -->
+                    <div class="scene scene-digital" id="scene-digital-skills">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="digital-room"></div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px;">⚔️</div>
+                            </div>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-header">
+                                <div class="detail-icon">⚔️</div>
+                                <div>
+                                    <div class="detail-title">TECHNICAL TOOLKIT</div>
+                                    <div class="detail-subtitle">eLearning development capabilities</div>
+                                </div>
+                                <div class="quest-status">✓ EQUIPPED</div>
+                            </div>
+                            <div class="loot-section">
+                                <div class="loot-title">🎁 ABILITIES UNLOCKED</div>
+                                <div class="skill-list">
+                                    <span class="skill-tag">ARTICULATE STORYLINE 360</span>
+                                    <span class="skill-tag">ARTICULATE RISE</span>
+                                    <span class="skill-tag">SCORM 1.2/2004</span>
+                                    <span class="skill-tag">xAPI/TIN CAN</span>
+                                    <span class="skill-tag">LMS ADMINISTRATION</span>
+                                    <span class="skill-tag">VIRTUAL FACILITATION</span>
+                                    <span class="skill-tag">ZOOM/TEAMS</span>
+                                    <span class="skill-tag">BRANCHING SCENARIOS</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('digital')">← BACK</button>
+                            <button class="nav-btn primary" onclick="goToScene('hub')">RETURN TO HUB</button>
+                        </div>
+                    </div>
+
+                    <!-- CURRICULUM SCENE -->
+                    <div class="scene scene-curriculum" id="scene-curriculum">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="workshop-room"></div>
+                                <div class="blueprint-table">
+                                    <div class="blueprint-grid"></div>
+                                    <div class="blueprint-shapes">
+                                        <div class="bp-shape"></div>
+                                        <div class="bp-shape"></div>
+                                    </div>
+                                </div>
+                                <div class="tools-rack">
+                                    <span class="tool">📏</span>
+                                    <span class="tool" style="animation-delay: 0.5s;">✏️</span>
+                                    <span class="tool" style="animation-delay: 1s;">📐</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dialogue-box">
+                            <div class="speaker-tag">DESIGN FORGE</div>
+                            <div class="dialogue-text">
+                                The forge of <span class="highlight">curriculum architecture</span>. Full program design, competency frameworks, and learning pathways are crafted here.<span class="cursor"></span>
+                            </div>
+                        </div>
+                        <div class="quest-log">
+                            <div class="quest-header">
+                                <span class="quest-header-icon">📜</span>
+                                <h3>QUEST LOG — CURRICULUM</h3>
+                            </div>
+                            <div class="quest-list">
+                                <div class="quest-item complete" onclick="goToScene('curriculum-pse')">
+                                    <div class="quest-icon">🤝</div>
+                                    <div class="quest-info">
+                                        <div class="quest-type">★ MAIN QUEST — COMPLETE</div>
+                                        <div class="quest-title">PSE 101</div>
+                                        <div class="quest-desc">40-hour Private Sector Engagement course for international development</div>
+                                        <div class="quest-rewards">
+                                            <span class="reward"><span class="reward-icon">⚡</span> +800 XP</span>
+                                            <span class="reward"><span class="reward-icon">🏆</span> Epic</span>
+                                        </div>
+                                    </div>
+                                    <div class="quest-arrow">▶</div>
+                                </div>
+                                <div class="quest-item complete" onclick="goToScene('curriculum-approach')">
+                                    <div class="quest-icon">🧭</div>
+                                    <div class="quest-info">
+                                        <div class="quest-type">★ PASSIVE ABILITY</div>
+                                        <div class="quest-title">DESIGN METHODOLOGY</div>
+                                        <div class="quest-desc">Approach to curriculum architecture</div>
+                                        <div class="quest-rewards">
+                                            <span class="reward"><span class="reward-icon">🛡️</span> +6 Skills</span>
+                                        </div>
+                                    </div>
+                                    <div class="quest-arrow">▶</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('hub')">← RETURN TO HUB</button>
+                            <button class="nav-btn" onclick="goToScene('media')">NEXT REALM →</button>
+                        </div>
+                    </div>
+
+                    <!-- CURRICULUM: PSE DETAIL -->
+                    <div class="scene scene-curriculum" id="scene-curriculum-pse">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="workshop-room"></div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Press Start 2P'; font-size: 1.5rem; color: #f97316;">40 HRS</div>
+                            </div>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-header">
+                                <div class="detail-icon">🤝</div>
+                                <div>
+                                    <div class="detail-title">PSE 101</div>
+                                    <div class="detail-subtitle">Private Sector Engagement for Development</div>
+                                </div>
+                                <div class="quest-status">✓ COMPLETE</div>
+                            </div>
+                            <div class="detail-body">
+                                <p>A comprehensive <span style="color: var(--hope-cyan);">40-hour course</span> on Private Sector Engagement for international development practitioners.</p>
+                                <p>Complete learning architecture: competency frameworks, module sequencing, knowledge assessments, practical exercises, and capstone projects. Designed for <span style="color: var(--warning-amber);">global deployment</span> across development organizations.</p>
+                            </div>
+                            <div class="loot-section">
+                                <div class="loot-title">🎁 SKILLS ACQUIRED</div>
+                                <div class="skill-list">
+                                    <span class="skill-tag">CURRICULUM DESIGN</span>
+                                    <span class="skill-tag">COMPETENCY MAPPING</span>
+                                    <span class="skill-tag">ASSESSMENT DESIGN</span>
+                                    <span class="skill-tag">FACILITATOR GUIDES</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('curriculum')">← BACK</button>
+                            <button class="nav-btn primary" onclick="goToScene('hub')">RETURN TO HUB</button>
+                        </div>
+                    </div>
+
+                    <!-- CURRICULUM: APPROACH -->
+                    <div class="scene scene-curriculum" id="scene-curriculum-approach">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="workshop-room"></div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px;">🧭</div>
+                            </div>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-header">
+                                <div class="detail-icon">🧭</div>
+                                <div>
+                                    <div class="detail-title">DESIGN METHODOLOGY</div>
+                                    <div class="detail-subtitle">Curriculum architecture approach</div>
+                                </div>
+                                <div class="quest-status">✓ EQUIPPED</div>
+                            </div>
+                            <div class="loot-section">
+                                <div class="loot-title">🎁 PASSIVE ABILITIES</div>
+                                <div class="skill-list">
+                                    <span class="skill-tag">BACKWARD DESIGN</span>
+                                    <span class="skill-tag">COMPETENCY FRAMEWORKS</span>
+                                    <span class="skill-tag">BLENDED LEARNING</span>
+                                    <span class="skill-tag">ASSESSMENT ARCHITECTURE</span>
+                                    <span class="skill-tag">FACILITATOR MATERIALS</span>
+                                    <span class="skill-tag">LEARNING PATHWAYS</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('curriculum')">← BACK</button>
+                            <button class="nav-btn primary" onclick="goToScene('hub')">RETURN TO HUB</button>
+                        </div>
+                    </div>
+
+                    <!-- MEDIA SCENE -->
+                    <div class="scene scene-media" id="scene-media">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="studio-room"></div>
+                                <div class="rec-indicator">
+                                    <div class="rec-dot"></div>
+                                    <span class="rec-text">REC</span>
+                                </div>
+                                <div class="sound-booth">
+                                    <div class="mic-stand">
+                                        <div class="mic-head"></div>
+                                        <div class="mic-pole"></div>
+                                        <div class="mic-base"></div>
+                                    </div>
+                                </div>
+                                <div class="waveform-display">
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dialogue-box">
+                            <div class="speaker-tag">MEDIA SANCTUM</div>
+                            <div class="dialogue-text">
+                                The sanctum of <span class="highlight">audio and video production</span>. Podcasts, documentaries, and multimedia content are forged here.<span class="cursor"></span>
+                            </div>
+                        </div>
+                        <div class="quest-log">
+                            <div class="quest-header">
+                                <span class="quest-header-icon">📜</span>
+                                <h3>QUEST LOG — MEDIA</h3>
+                            </div>
+                            <div class="quest-list">
+                                <div class="quest-item complete" onclick="goToScene('media-podcast')">
+                                    <div class="quest-icon">🎙️</div>
+                                    <div class="quest-info">
+                                        <div class="quest-type">★ MAIN QUEST — COMPLETE</div>
+                                        <div class="quest-title">ADVANCING HEALTH SYSTEMS</div>
+                                        <div class="quest-desc">Podcast production: research, interviews, editing, distribution</div>
+                                        <div class="quest-rewards">
+                                            <span class="reward"><span class="reward-icon">⚡</span> +400 XP</span>
+                                            <span class="reward"><span class="reward-icon">🎯</span> Audio</span>
+                                        </div>
+                                    </div>
+                                    <div class="quest-arrow">▶</div>
+                                </div>
+                                <div class="quest-item complete" onclick="goToScene('media-video')">
+                                    <div class="quest-icon">🎬</div>
+                                    <div class="quest-info">
+                                        <div class="quest-type">★ SIDE QUEST — COMPLETE</div>
+                                        <div class="quest-title">ZELA VIDEOS</div>
+                                        <div class="quest-desc">Environmental documentary and advocacy video production</div>
+                                        <div class="quest-rewards">
+                                            <span class="reward"><span class="reward-icon">⚡</span> +350 XP</span>
+                                            <span class="reward"><span class="reward-icon">🎯</span> Video</span>
+                                        </div>
+                                    </div>
+                                    <div class="quest-arrow">▶</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('hub')">← RETURN TO HUB</button>
+                            <button class="nav-btn" onclick="goToScene('field')">NEXT REALM →</button>
+                        </div>
+                    </div>
+
+                    <!-- MEDIA: PODCAST -->
+                    <div class="scene scene-media" id="scene-media-podcast">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="studio-room"></div>
+                                <div class="rec-indicator">
+                                    <div class="rec-dot"></div>
+                                    <span class="rec-text">LIVE</span>
+                                </div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px;">🎙️</div>
+                            </div>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-header">
+                                <div class="detail-icon">🎙️</div>
+                                <div>
+                                    <div class="detail-title">ADVANCING HEALTH SYSTEMS</div>
+                                    <div class="detail-subtitle">Podcast Production</div>
+                                </div>
+                                <div class="quest-status">✓ COMPLETE</div>
+                            </div>
+                            <div class="detail-body">
+                                <p>Full production lifecycle for a health systems podcast: <span style="color: var(--hope-cyan);">guest research, outreach, interview preparation, recording, editing, mixing, and distribution</span>.</p>
+                                <p>Translating complex health systems concepts into accessible conversations for practitioners.</p>
+                            </div>
+                            <div class="loot-section">
+                                <div class="loot-title">🎁 SKILLS ACQUIRED</div>
+                                <div class="skill-list">
+                                    <span class="skill-tag">AUDIO PRODUCTION</span>
+                                    <span class="skill-tag">INTERVIEWING</span>
+                                    <span class="skill-tag">EDITING</span>
+                                    <span class="skill-tag">CONTENT STRATEGY</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('media')">← BACK</button>
+                            <button class="nav-btn primary" onclick="goToScene('hub')">RETURN TO HUB</button>
+                        </div>
+                    </div>
+
+                    <!-- MEDIA: VIDEO -->
+                    <div class="scene scene-media" id="scene-media-video">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="studio-room"></div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px;">🎬</div>
+                            </div>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-header">
+                                <div class="detail-icon">🎬</div>
+                                <div>
+                                    <div class="detail-title">ZELA VIDEOS</div>
+                                    <div class="detail-subtitle">Environmental Video Production</div>
+                                </div>
+                                <div class="quest-status">✓ COMPLETE</div>
+                            </div>
+                            <div class="detail-body">
+                                <p>Video production for <span style="color: var(--hope-cyan);">environmental advocacy and documentation</span>. Pre-production through delivery: scripting, shoot coordination, editing, color grading, motion graphics.</p>
+                            </div>
+                            <div class="loot-section">
+                                <div class="loot-title">🎁 SKILLS ACQUIRED</div>
+                                <div class="skill-list">
+                                    <span class="skill-tag">VIDEO PRODUCTION</span>
+                                    <span class="skill-tag">EDITING</span>
+                                    <span class="skill-tag">MOTION GRAPHICS</span>
+                                    <span class="skill-tag">STORYTELLING</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('media')">← BACK</button>
+                            <button class="nav-btn primary" onclick="goToScene('hub')">RETURN TO HUB</button>
+                        </div>
+                    </div>
+
+                    <!-- FIELD SCENE -->
+                    <div class="scene scene-field" id="scene-field">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="sun"></div>
+                                <div class="mountains">
+                                    <div class="mountain back" style="left: 5%;"></div>
+                                    <div class="mountain front" style="left: 25%;">
+                                        <div class="mountain-snow"></div>
+                                    </div>
+                                    <div class="mountain back" style="left: 50%;"></div>
+                                    <div class="mountain front" style="left: 70%;">
+                                        <div class="mountain-snow"></div>
+                                    </div>
+                                </div>
+                                <div class="trees-layer">
+                                    <div class="tree" style="left: 10%;">
+                                        <div class="tree-leaves"></div>
+                                        <div class="tree-leaves"></div>
+                                        <div class="tree-trunk"></div>
+                                    </div>
+                                    <div class="tree" style="left: 25%;">
+                                        <div class="tree-leaves"></div>
+                                        <div class="tree-trunk"></div>
+                                    </div>
+                                    <div class="tree" style="left: 75%;">
+                                        <div class="tree-leaves"></div>
+                                        <div class="tree-leaves"></div>
+                                        <div class="tree-trunk"></div>
+                                    </div>
+                                    <div class="tree" style="left: 88%;">
+                                        <div class="tree-leaves"></div>
+                                        <div class="tree-trunk"></div>
+                                    </div>
+                                    <div class="path"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dialogue-box">
+                            <div class="speaker-tag">FIELD TERRITORIES</div>
+                            <div class="dialogue-text">
+                                The wilderness of <span class="highlight">experiential programs</span>. International workshops, site-based learning, and expedition training are conducted here.<span class="cursor"></span>
+                            </div>
+                        </div>
+                        <div class="quest-log">
+                            <div class="quest-header">
+                                <span class="quest-header-icon">📜</span>
+                                <h3>QUEST LOG — FIELD</h3>
+                            </div>
+                            <div class="quest-list">
+                                <div class="quest-item complete" onclick="goToScene('field-ghana')">
+                                    <div class="quest-icon">🌍</div>
+                                    <div class="quest-info">
+                                        <div class="quest-type">★ LEGENDARY QUEST — COMPLETE</div>
+                                        <div class="quest-title">GHANA: NR CRIMES</div>
+                                        <div class="quest-desc">Multi-week investigations workshop for Sub-Saharan coalition</div>
+                                        <div class="quest-rewards">
+                                            <span class="reward"><span class="reward-icon">⚡</span> +1000 XP</span>
+                                            <span class="reward"><span class="reward-icon">👑</span> Legendary</span>
+                                        </div>
+                                    </div>
+                                    <div class="quest-arrow">▶</div>
+                                </div>
+                                <div class="quest-item complete" onclick="goToScene('field-montana')">
+                                    <div class="quest-icon">🏔️</div>
+                                    <div class="quest-info">
+                                        <div class="quest-type">★ MAIN QUEST — COMPLETE</div>
+                                        <div class="quest-title">MONTANA: PROTECTED AREAS</div>
+                                        <div class="quest-desc">Glacier National Park seminar on management approaches</div>
+                                        <div class="quest-rewards">
+                                            <span class="reward"><span class="reward-icon">⚡</span> +700 XP</span>
+                                            <span class="reward"><span class="reward-icon">🏆</span> Epic</span>
+                                        </div>
+                                    </div>
+                                    <div class="quest-arrow">▶</div>
+                                </div>
+                                <div class="quest-item complete" onclick="goToScene('field-arizona')">
+                                    <div class="quest-icon">🏜️</div>
+                                    <div class="quest-info">
+                                        <div class="quest-type">★ MAIN QUEST — COMPLETE</div>
+                                        <div class="quest-title">ARIZONA: WATER SYSTEMS</div>
+                                        <div class="quest-desc">Watershed management from CAP to Grand Canyon</div>
+                                        <div class="quest-rewards">
+                                            <span class="reward"><span class="reward-icon">⚡</span> +650 XP</span>
+                                            <span class="reward"><span class="reward-icon">🏆</span> Epic</span>
+                                        </div>
+                                    </div>
+                                    <div class="quest-arrow">▶</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('hub')">← RETURN TO HUB</button>
+                            <button class="nav-btn" onclick="goToScene('contact')">CONTACT →</button>
+                        </div>
+                    </div>
+
+                    <!-- FIELD: GHANA -->
+                    <div class="scene scene-field" id="scene-field-ghana">
+                        <div class="scene-art">
+                            <div class="pixel-scene" style="background: linear-gradient(180deg, #f59e0b 0%, #92400e 50%, #451a03 100%);">
+                                <div style="position: absolute; top: 10%; right: 15%; width: 50px; height: 50px; background: radial-gradient(circle, #fcd34d 0%, #f59e0b 50%, transparent 70%); border-radius: 50%;"></div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px;">🌍</div>
+                            </div>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-header">
+                                <div class="detail-icon">🌍</div>
+                                <div>
+                                    <div class="detail-title">GHANA: NR CRIMES WORKSHOP</div>
+                                    <div class="detail-subtitle">Sub-Saharan Africa Coalition</div>
+                                </div>
+                                <div class="quest-status">👑 LEGENDARY</div>
+                            </div>
+                            <div class="detail-body">
+                                <p>A <span style="color: var(--hope-cyan);">multi-week investigations workshop</span> for ministry officials, law enforcement, and government practitioners from across Sub-Saharan Africa.</p>
+                                <p>Evidence collection, prosecution procedures, and cross-border cooperation—classroom sessions integrated with <span style="color: var(--warning-amber);">active investigation sites</span>.</p>
+                            </div>
+                            <div class="loot-section">
+                                <div class="loot-title">🎁 SKILLS ACQUIRED</div>
+                                <div class="skill-list">
+                                    <span class="skill-tag">CROSS-CULTURAL FACILITATION</span>
+                                    <span class="skill-tag">FIELD-BASED LEARNING</span>
+                                    <span class="skill-tag">COALITION BUILDING</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('field')">← BACK</button>
+                            <button class="nav-btn primary" onclick="goToScene('hub')">RETURN TO HUB</button>
+                        </div>
+                    </div>
+
+                    <!-- FIELD: MONTANA -->
+                    <div class="scene scene-field" id="scene-field-montana">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="sun"></div>
+                                <div class="mountains">
+                                    <div class="mountain front" style="left: 20%;"><div class="mountain-snow"></div></div>
+                                    <div class="mountain front" style="left: 50%;"><div class="mountain-snow"></div></div>
+                                </div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px;">🏔️</div>
+                            </div>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-header">
+                                <div class="detail-icon">🏔️</div>
+                                <div>
+                                    <div class="detail-title">MONTANA: PROTECTED AREAS</div>
+                                    <div class="detail-subtitle">Glacier National Park Seminar</div>
+                                </div>
+                                <div class="quest-status">✓ COMPLETE</div>
+                            </div>
+                            <div class="detail-body">
+                                <p>A <span style="color: var(--hope-cyan);">multi-week seminar</span> on protected area management with Glacier National Park as the living classroom.</p>
+                                <p>Meetings with Indigenous groups, river expeditions studying watershed dynamics, and building <span style="color: var(--warning-amber);">situation maps using social-ecological systems thinking</span>.</p>
+                            </div>
+                            <div class="loot-section">
+                                <div class="loot-title">🎁 SKILLS ACQUIRED</div>
+                                <div class="skill-list">
+                                    <span class="skill-tag">EXPERIENTIAL LEARNING</span>
+                                    <span class="skill-tag">INDIGENOUS ENGAGEMENT</span>
+                                    <span class="skill-tag">SYSTEMS THINKING</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('field')">← BACK</button>
+                            <button class="nav-btn primary" onclick="goToScene('hub')">RETURN TO HUB</button>
+                        </div>
+                    </div>
+
+                    <!-- FIELD: ARIZONA -->
+                    <div class="scene scene-field" id="scene-field-arizona">
+                        <div class="scene-art">
+                            <div class="pixel-scene" style="background: linear-gradient(180deg, #fbbf24 0%, #ea580c 30%, #b45309 60%, #78350f 100%);">
+                                <div style="position: absolute; bottom: 20%; left: 10%; right: 10%; height: 15px; background: linear-gradient(90deg, transparent, #0ea5e9, transparent); border: 2px solid #0284c7;"></div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px;">🏜️</div>
+                            </div>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-header">
+                                <div class="detail-icon">🏜️</div>
+                                <div>
+                                    <div class="detail-title">ARIZONA: WATER SYSTEMS</div>
+                                    <div class="detail-subtitle">Watershed Management Seminar</div>
+                                </div>
+                                <div class="quest-status">✓ COMPLETE</div>
+                            </div>
+                            <div class="detail-body">
+                                <p>A watershed management seminar spanning the entire water story: the <span style="color: var(--hope-cyan);">Central Arizona Project</span> (336 miles of infrastructure), Tucson conservation, Flagstaff wildlife corridors, culminating at the <span style="color: var(--warning-amber);">Grand Canyon</span>.</p>
+                            </div>
+                            <div class="loot-section">
+                                <div class="loot-title">🎁 SKILLS ACQUIRED</div>
+                                <div class="skill-list">
+                                    <span class="skill-tag">WATER SYSTEMS</span>
+                                    <span class="skill-tag">INFRASTRUCTURE</span>
+                                    <span class="skill-tag">SITE-BASED LEARNING</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn" onclick="goToScene('field')">← BACK</button>
+                            <button class="nav-btn primary" onclick="goToScene('hub')">RETURN TO HUB</button>
+                        </div>
+                    </div>
+
+                    <!-- CONTACT SCENE -->
+                    <div class="scene scene-contact" id="scene-contact">
+                        <div class="scene-art">
+                            <div class="pixel-scene">
+                                <div class="satellite">
+                                    <div class="sat-panel left"></div>
+                                    <div class="sat-body"></div>
+                                    <div class="sat-panel right"></div>
+                                </div>
+                                <div class="signal-rings">
+                                    <div class="ring"></div>
+                                    <div class="ring"></div>
+                                    <div class="ring"></div>
+                                </div>
+                                <div class="comm-station">
+                                    <div class="comm-console">
+                                        <div class="comm-screen">
+                                            <div class="signal-wave"></div>
+                                        </div>
+                                        <div class="comm-buttons">
+                                            <div class="comm-btn"></div>
+                                            <div class="comm-btn"></div>
+                                            <div class="comm-btn"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dialogue-box">
+                            <div class="speaker-tag">GUILD TRANSMISSION</div>
+                            <div class="dialogue-text">
+                                Seeking party members for quests as <span class="highlight">Learning Architect</span>, <span class="highlight">Instructional Designer</span>, or <span class="highlight">Learning Experience Designer</span> in social impact, behavior change, conservation, and natural resource management.<span class="cursor"></span>
+                            </div>
+                        </div>
+                        <div class="contact-details">
+                            <div class="contact-line">
+                                <span class="icon">📧</span>
+                                <a href="mailto:kirby.crider@gmail.com">kirby.crider@gmail.com</a>
+                            </div>
+                            <div class="contact-line">
+                                <span class="icon">🌐</span>
+                                <a href="https://kirbyc.carrd.co" target="_blank">kirbyc.carrd.co</a>
+                            </div>
+                            <div class="contact-line">
+                                <span class="icon">🌍</span>
+                                <span>Available for remote & global deployment</span>
+                            </div>
+                        </div>
+                        <div class="nav-row">
+                            <button class="nav-btn primary" onclick="goToScene('hub')">← RETURN TO HUB</button>
+                        </div>
+                    </div>
+
                 </div>
+
+                <nav class="quick-nav">
+                    <button class="quick-btn" onclick="goToScene('hub')">🏠 HUB</button>
+                    <button class="quick-btn" onclick="goToScene('digital')">💻 DIGITAL</button>
+                    <button class="quick-btn" onclick="goToScene('curriculum')">📐 CURRICULUM</button>
+                    <button class="quick-btn" onclick="goToScene('media')">🎙️ MEDIA</button>
+                    <button class="quick-btn" onclick="goToScene('field')">🌍 FIELD</button>
+                    <button class="quick-btn" onclick="goToScene('contact')">📡 CONTACT</button>
+                </nav>
+                <div class="inventory-hint">Press [ESC] to return to hub • Press [I] for inventory</div>
+
             </div>
-            
-            <div id="contact-bar">
-                <span style="color: var(--amber);">// DIRECT UPLINK //</span><br><br>
-                <a href="mailto:kirby.crider@gmail.com">📧 kirby.crider@gmail.com</a>
-                <a href="tel:919-357-1797">📞 919-357-1797</a>
-                <a href="https://linkedin.com/in/kirbycrider" target="_blank">💼 LinkedIn</a>
-                <a href="https://kirbyc.carrd.co" target="_blank">🌐 Portfolio</a>
-            </div>
+
         </div>
     </div>
-    
-    <!-- Modal -->
-    <div id="modal-overlay">
-        <div id="modal-content">
-            <h2 id="modal-title"></h2>
-            <div id="modal-body"></div>
-            <button class="close-modal" onclick="closeModal()">[ CLOSE TRANSMISSION ]</button>
-        </div>
-    </div>
-    
-    <!-- Achievement popup -->
-    <div id="achievement">
-        <div class="ach-title">CAPABILITY UNLOCKED</div>
-        <div class="ach-desc" id="ach-text"></div>
-    </div>
-    
+
     <script>
-        // Game State
-        const gameState = {
-            location: 'hub',
-            year: 2047,
-            trust: 3,
-            impact: 0,
-            discovered: new Set(),
-            inventory: [],
-            missionLog: [],
-            totalDiscoverable: 12
-        };
-        
-        // ASCII Art for locations
-        const asciiArt = {
-            hub: `
-     ╔════════════════════════════════════════════════════════════╗
-     ║  CHARLOTTESVILLE RESILIENCE HUB - SECTOR 7                 ║
-     ║  ┌──────┐  ┌──────┐  ▓▓▓▓▓▓  ┌──────┐                      ║
-     ║  │ COMM │  │LEARN │  ▓SOLAR▓  │ DATA │   🌿 Urban Forest   ║
-     ║  │CENTER│──│ LAB  │──▓ARRAY▓──│ CORE │   🌿 Buffer Zone    ║
-     ║  └──────┘  └──────┘  ▓▓▓▓▓▓  └──────┘                      ║
-     ╚════════════════════════════════════════════════════════════╝`,
-            
-            montana: `
-     ╔════════════════════════════════════════════════════════════╗
-     ║  MONTANA PROTECTED AREA MANAGEMENT ZONE                    ║
-     ║      /\\      /\\      ≋≋≋≋≋≋≋      /\\                       ║
-     ║     /  \\    /  \\    ≋ RIVER ≋    /  \\   🦌 Wildlife        ║
-     ║    /🌲  \\  /🌲  \\   ≋≋≋≋≋≋≋    /🌲  \\   Corridor          ║
-     ║   /______\\/______\\            /______\\                     ║
-     ║   [FIELD STATION]  [TRAINING CENTER]  [MONITORING POST]    ║
-     ╚════════════════════════════════════════════════════════════╝`,
-            
-            zimbabwe: `
-     ╔════════════════════════════════════════════════════════════╗
-     ║  ZIMBABWE COMMUNITY RIGHTS NETWORK                         ║
-     ║    🏘️ ════════ 📡 ════════ 🏘️ ════════ 🏘️                  ║
-     ║    Village    Uplink    Village    Village                 ║
-     ║    Alpha      Tower     Beta       Gamma                   ║
-     ║         \\       │       /           │                      ║
-     ║          \\      │      /            │                      ║
-     ║           [RESOURCE MONITORING ZONE]                       ║
-     ╚════════════════════════════════════════════════════════════╝`,
-            
-            virtual: `
-     ╔════════════════════════════════════════════════════════════╗
-     ║  GLOBAL VIRTUAL LEARNING MATRIX                            ║
-     ║                                                            ║
-     ║    ◉───────◉───────◉     ┌─────────────┐                   ║
-     ║    │       │       │     │ ACTIVE NODES│                   ║
-     ║    ◉───────◉───────◉     │   > 10,000  │                   ║
-     ║    │       │       │     │   LEARNERS  │                   ║
-     ║    ◉───────◉───────◉     └─────────────┘                   ║
-     ║         [YOU ARE EVERYWHERE]                               ║
-     ╚════════════════════════════════════════════════════════════╝`,
-            
-            imf: `
-     ╔════════════════════════════════════════════════════════════╗
-     ║  GLOBAL FINANCIAL RESILIENCE INSTITUTE                     ║
-     ║                                                            ║
-     ║    ┌─────────────────────────────────────────┐             ║
-     ║    │  📊  MOOC DISTRIBUTION CENTER  📊       │             ║
-     ║    │   ╔══════╗  ╔══════╗  ╔══════╗         │             ║
-     ║    │   ║COURSE║  ║COURSE║  ║COURSE║         │             ║
-     ║    │   ║ 001  ║  ║ 002  ║  ║ 003  ║         │             ║
-     ║    └─────────────────────────────────────────┘             ║
-     ╚════════════════════════════════════════════════════════════╝`,
-            
-            ending: `
-     ╔════════════════════════════════════════════════════════════╗
-     ║                                                            ║
-     ║         🌍  GLOBAL CAPACITY NETWORK ONLINE  🌍             ║
-     ║                                                            ║
-     ║    ◉═══════◉═══════◉═══════◉═══════◉═══════◉              ║
-     ║    ║       ║       ║       ║       ║       ║              ║
-     ║    ◉═══════◉═══════◉═══════◉═══════◉═══════◉              ║
-     ║    ║       ║       ║       ║       ║       ║              ║
-     ║    ◉═══════◉═══════◉═══════◉═══════◉═══════◉              ║
-     ║                                                            ║
-     ║              [ THE WORK CONTINUES ]                        ║
-     ╚════════════════════════════════════════════════════════════╝`
-        };
-        
-        // Story nodes
-        const storyNodes = {
-            intro: {
-                location: 'hub',
-                narrative: [
-                    { type: 'system', text: '> INCOMING TRANSMISSION...' },
-                    { type: 'system', text: '> ORIGIN: Global Capacity Coordination Network' },
-                    { type: 'normal', text: 'The floods of \'39 took the old world. The heat domes of \'42 tested what remained. But humanity adapted—not through technology alone, but through <span class="highlight">learning systems</span> that helped communities understand, prepare, and transform.' },
-                    { type: 'normal', text: 'You are <span class="highlight">KIRBY CRIDER</span>, Learning Architect. For over 15 years, you\'ve designed systems that build capacity at scale. Now, in 2047, the Resilience Council has activated your file.' },
-                    { type: 'alert', text: 'PRIORITY ALERT: Multiple learning emergencies detected across the network. Your expertise is required.' }
-                ],
-                choices: [
-                    { text: 'Review my capabilities and experience', action: 'viewCapabilities' },
-                    { text: 'Accept the first mission assignment', action: 'mission1' },
-                    { text: 'Access the historical archives (my background)', action: 'archives' }
-                ]
-            },
-            
-            viewCapabilities: {
-                location: 'hub',
-                narrative: [
-                    { type: 'system', text: '> CAPABILITY MATRIX LOADING...' },
-                    { type: 'normal', text: 'Your neural-linked portfolio displays your core capabilities:' },
-                    { type: 'success', text: '<span class="skill-tag">Learning Strategy</span> <span class="skill-tag">Facilitation</span> <span class="skill-tag">Communities of Practice</span> <span class="skill-tag">Knowledge Management</span> <span class="skill-tag">Instructional Design</span>' },
-                    { type: 'success', text: '<span class="skill-tag">ADDIE/SAM/Action Mapping</span> <span class="skill-tag">Virtual & Hybrid Delivery</span> <span class="skill-tag">Equity-Informed Design</span> <span class="skill-tag">LMS Administration</span>' },
-                    { type: 'normal', text: 'Certifications: M.S. Instructional Systems (Florida State), B.A. Psychology (UNC Chapel Hill). 15+ years designing learning for nonprofit, public-sector, and social-impact organizations.' },
-                    { type: 'normal', text: 'You recall the old Training Resources Group days—11 years of building capacity for USAID, World Bank, and countless international partners. The work shaped you.' }
-                ],
-                choices: [
-                    { text: 'Examine AI Learning Design capabilities', action: 'aiCapabilities' },
-                    { text: 'Return to mission briefing', action: 'intro' },
-                    { text: 'Begin first mission', action: 'mission1' }
-                ],
-                discover: 'core_capabilities'
-            },
-            
-            aiCapabilities: {
-                location: 'virtual',
-                narrative: [
-                    { type: 'system', text: '> ACCESSING AI DESIGN PROTOCOLS...' },
-                    { type: 'normal', text: 'In 2025, before the great restructuring, you pioneered <span class="highlight">AI-led learning experiences</span> at Active Learning Sciences.' },
-                    { type: 'success', text: 'ACHIEVEMENT: Designed 30+ chatbot-driven learning experiences (~2 hours each), achieving 95% reduction in development time while maintaining rigorous outcomes.' },
-                    { type: 'normal', text: 'You developed reusable prompt architectures, evaluation logic, and quality standards that other designers adopted. The patterns you created became templates for the adaptive learning systems that now serve millions.' },
-                    { type: 'normal', text: 'The AI wasn\'t replacing teachers—it was <span class="highlight">amplifying human judgment</span>, creating personalized paths through complex governance scenarios.' }
-                ],
-                choices: [
-                    { text: 'See how this connects to current work', action: 'currentWork' },
-                    { text: 'Return to main hub', action: 'intro' }
-                ],
-                discover: 'ai_learning'
-            },
-            
-            currentWork: {
-                location: 'hub',
-                narrative: [
-                    { type: 'system', text: '> CURRENT DEPLOYMENT STATUS...' },
-                    { type: 'normal', text: 'Your active roles pulse on the display:' },
-                    { type: 'success', text: '<span class="highlight">Within Global</span> - Partner, Learning Systems & Strategy (2025-Present): Supporting mission-driven organizations on learning system design, onboarding, and knowledge clarity in evolving organizational environments.' },
-                    { type: 'success', text: '<span class="highlight">Training Resources Group</span> - Freelance Consultant: Providing targeted support to World Bank Group, Inter-American Development Bank, Pew Research Center, and Special Olympics International.' },
-                    { type: 'normal', text: 'The pattern is clear: you work with organizations navigating complexity, helping them learn faster than their challenges evolve.' }
-                ],
-                choices: [
-                    { text: 'Accept Mission 1: Montana Protected Areas', action: 'mission1' },
-                    { text: 'Accept Mission 2: Zimbabwe Community Rights', action: 'mission2' },
-                    { text: 'Return to main hub', action: 'intro' }
-                ],
-                discover: 'current_work'
-            },
-            
-            archives: {
-                location: 'hub',
-                narrative: [
-                    { type: 'system', text: '> ACCESSING HISTORICAL ARCHIVES...' },
-                    { type: 'normal', text: 'The archives reveal your journey:' },
-                    { type: 'normal', text: '<span class="highlight">2010-2013: Windwalker Corporation</span> — You designed scenario-based learning and simulations for public-sector clients. This is where you learned that effective learning isn\'t about information transfer—it\'s about <span class="highlight">behavior change</span>.' },
-                    { type: 'normal', text: '<span class="highlight">2013-2014: CADCA National Coalition Institute</span> — You led curriculum development for a national public health nonprofit, supporting communities building coalitions against substance abuse.' },
-                    { type: 'normal', text: '<span class="highlight">2014-2025: Training Resources Group</span> — 11 years. Learning Technology Specialist, then Consultant, then Board of Directors. You built 50+ e-learning modules, launched podcasts with 10,000+ plays, designed multi-week international seminars.' }
-                ],
-                choices: [
-                    { text: 'Dive deeper into the TRG years', action: 'trgDeep' },
-                    { text: 'Return to present day', action: 'intro' }
-                ],
-                discover: 'career_history'
-            },
-            
-            trgDeep: {
-                location: 'hub',
-                narrative: [
-                    { type: 'system', text: '> TRAINING RESOURCES GROUP: 2014-2025' },
-                    { type: 'normal', text: 'The memories crystallize. An employee-owned firm. Collaborative. Mission-driven.' },
-                    { type: 'normal', text: 'You served on the <span class="highlight">Board of Directors</span>, contributing to organizational governance and strategy. You learned that building learning systems means building <span class="highlight">organizational capacity</span>—not just courses.' },
-                    { type: 'success', text: 'Key Insight: "Multi-day in-person learning CAN be translated into impactful asynchronous experiences—but only when designed intentionally, organized well from the start, and when they bring in a range of different tools."' },
-                    { type: 'normal', text: 'The Private Sector Engagement 101 curriculum proved it: 33 modules, cohort-based learning, user-generated maps, scenario-based learning—all deployed at scale across a global agency.' }
-                ],
-                choices: [
-                    { text: 'See the portfolio projects', action: 'portfolioOverview' },
-                    { text: 'Begin Mission 1', action: 'mission1' }
-                ],
-                discover: 'trg_leadership'
-            },
-            
-            portfolioOverview: {
-                location: 'virtual',
-                narrative: [
-                    { type: 'system', text: '> PORTFOLIO ARCHIVE ACCESSED' },
-                    { type: 'normal', text: 'Your life\'s work flickers across holographic displays:' },
-                    { type: 'success', text: '📍 International Seminar on Protected Area Management — Multi-week experiential program, 20 countries, skilled facilitation creating psychological safety across vast differences.' },
-                    { type: 'success', text: '📍 Community Environmental Rights Video Series (Zimbabwe) — 9 videos in English, Ndebele, and Shona. Remote collaboration, smartphone voiceover, rapid deployment.' },
-                    { type: 'success', text: '📍 Cybersecurity for Development — High-production animated videos for USAID global staff. You got your hands in the After Effects mix.' },
-                    { type: 'success', text: '📍 Natural Resource Crime Investigation — Virtual capstone simulation. Articulate Storyline used LIVE in Zoom breakout rooms. "The best virtual classroom I\'ve ever been in."' },
-                    { type: 'success', text: '📍 Health Governance Podcast — 10,000+ plays globally. Yes, there\'s an excerpt of a rap about the SDGs.' }
-                ],
-                choices: [
-                    { text: 'Explore the Montana mission in depth', action: 'mission1' },
-                    { text: 'Explore the Zimbabwe mission in depth', action: 'mission2' },
-                    { text: 'Explore the Virtual Learning innovations', action: 'mission3' }
-                ],
-                discover: 'portfolio_overview'
-            },
-            
-            mission1: {
-                location: 'montana',
-                narrative: [
-                    { type: 'system', text: '> MISSION BRIEFING: PROTECTED AREA CRISIS' },
-                    { type: 'alert', text: 'LOCATION: Montana Bioregion | STATUS: Climate migration pressure intensifying' },
-                    { type: 'normal', text: 'Twenty protected area managers from around the world have gathered. They come from vastly different political, cultural, and ecological contexts. The forests are changing faster than management protocols can adapt.' },
-                    { type: 'normal', text: 'You recall the <span class="highlight">International Seminar on Protected Area Management (ISPAM)</span>—a three-week experiential program you helped design and facilitate with the U.S. Forest Service and University of Montana.' },
-                    { type: 'normal', text: 'Your role: create a learning environment where participants can surface experience, disagreement, and insight constructively—turning <span class="highlight">diversity of context into a learning asset</span> rather than a barrier.' }
-                ],
-                choices: [
-                    { text: 'Facilitate a systems thinking exercise', action: 'mission1_systems' },
-                    { text: 'Guide a structured reflection session', action: 'mission1_reflection' },
-                    { text: 'Return to hub for different mission', action: 'intro' }
-                ],
-                discover: 'ispam_overview'
-            },
-            
-            mission1_systems: {
-                location: 'montana',
-                narrative: [
-                    { type: 'normal', text: 'You deploy the <span class="highlight">Blue Mountain Recreation Area Virtual Site Visit</span>—a tool you built using Articulate Storyline and the Adobe Suite.' },
-                    { type: 'normal', text: 'The simulation isn\'t a "next-button-slide-deck." It combines opportunistically-captured video with interactive simulations that help managers explore trade-offs, stakeholder perspectives, and cascading consequences.' },
-                    { type: 'success', text: 'The Kenyan park warden sees parallels to her elephant corridor challenges. The Brazilian reserve manager recognizes patterns from his fire management decisions. A Thai marine sanctuary director draws unexpected connections.' },
-                    { type: 'normal', text: 'Key Lesson: <span class="highlight">Rapid e-learning tools aren\'t just for click-through modules.</span> With smart design, they can drive high-stakes, collaborative experiences.' }
-                ],
-                choices: [
-                    { text: 'Continue to the field exercise', action: 'mission1_complete' },
-                    { text: 'Try the reflection approach instead', action: 'mission1_reflection' }
-                ],
-                discover: 'blue_mountain'
-            },
-            
-            mission1_reflection: {
-                location: 'montana',
-                narrative: [
-                    { type: 'normal', text: 'You gather the group for structured reflection. Your facilitation training kicks in—you\'ve done this across continents, cultures, and contexts.' },
-                    { type: 'normal', text: 'You create space for the uncomfortable truths: the Colombian manager faces cartel pressure his Norwegian counterpart can\'t imagine. The Indian forester operates under bureaucratic constraints that would paralyze the American team.' },
-                    { type: 'success', text: 'The magic happens in the margins—coffee breaks, shared meals, walks between sites. This is where real peer learning occurs. Your job is to design the container that makes these moments possible.' },
-                    { type: 'normal', text: 'Key Lesson: <span class="highlight">High-impact international learning depends as much on facilitation quality and psychological safety as on technical content.</span>' }
-                ],
-                choices: [
-                    { text: 'Complete the Montana mission', action: 'mission1_complete' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'facilitation_deep'
-            },
-            
-            mission1_complete: {
-                location: 'montana',
-                narrative: [
-                    { type: 'success', text: '> MISSION COMPLETE: Montana Protected Areas' },
-                    { type: 'normal', text: 'The three-week seminar concludes. Twenty managers return to their homes across six continents, carrying not just knowledge but <span class="highlight">a network</span>.' },
-                    { type: 'normal', text: 'They\'ll stay connected through the community of practice you helped establish. They\'ll share resources, troubleshoot challenges, and remind each other that their work matters.' },
-                    { type: 'success', text: '+25 IMPACT POINTS | +1 TRUST LEVEL' },
-                    { type: 'normal', text: 'The real measure of success isn\'t what they learned here—it\'s what they\'ll do differently when they face their next impossible decision.' }
-                ],
-                choices: [
-                    { text: 'Accept Mission 2: Zimbabwe Community Rights', action: 'mission2' },
-                    { text: 'Accept Mission 3: Virtual Learning Crisis', action: 'mission3' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'montana_complete'
-            },
-            
-            mission2: {
-                location: 'zimbabwe',
-                narrative: [
-                    { type: 'system', text: '> MISSION BRIEFING: COMMUNITY RIGHTS EMERGENCY' },
-                    { type: 'alert', text: 'LOCATION: Zimbabwe Rural Network | STATUS: Mining expansion threatening community lands' },
-                    { type: 'normal', text: 'Mining companies are seeking to extract resources on community lands. The people living there have rights—but many don\'t know what those rights are or how to exercise them.' },
-                    { type: 'normal', text: 'You remember the partnership with <span class="highlight">ZELA</span>, a Zimbabwean NGO fighting for environmental justice. The U.S. Forest Service asked you to help get critical information into communities\' hands.' },
-                    { type: 'normal', text: 'The challenge: low bandwidth, limited literacy in some areas, communities that won\'t sit through a training or read a long PDF brief.' }
-                ],
-                choices: [
-                    { text: 'Develop the video series strategy', action: 'mission2_video' },
-                    { text: 'Explore remote collaboration approach', action: 'mission2_remote' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'zimbabwe_context'
-            },
-            
-            mission2_video: {
-                location: 'zimbabwe',
-                narrative: [
-                    { type: 'normal', text: 'You led a team that produced <span class="highlight">9 videos in English, Ndebele, and Shona</span>—the languages communities actually speak.' },
-                    { type: 'normal', text: 'The videos covered mining impacts, the environmental impact assessment process, and the role of community monitors. You used existing footage, animation, and voiceover to communicate core ideas quickly and clearly.' },
-                    { type: 'success', text: 'Key Innovation: Remote voiceover recording on smartphones, cleaned up with tools like Adobe Podcast Enhance. High production value, distributed creation.' },
-                    { type: 'normal', text: 'The videos spread through community networks, played on phones passed hand to hand, shown at village gatherings. The information traveled further than any training program could reach.' }
-                ],
-                choices: [
-                    { text: 'Complete Zimbabwe mission', action: 'mission2_complete' },
-                    { text: 'Explore the remote collaboration', action: 'mission2_remote' }
-                ],
-                discover: 'zela_videos'
-            },
-            
-            mission2_remote: {
-                location: 'zimbabwe',
-                narrative: [
-                    { type: 'normal', text: 'You never set foot in Zimbabwe for this project. The collaboration was entirely remote—working across time zones, navigating connectivity challenges, building trust through video calls and shared documents.' },
-                    { type: 'normal', text: 'Your NGO partners in Zimbabwe knew their communities. You knew how to structure learning, capture attention, and convey complex information simply. Together, you created something neither could have built alone.' },
-                    { type: 'success', text: 'Key Lesson: <span class="highlight">Videos can be powerful ways to get a message out</span>, especially in low-bandwidth environments and for those who might not be willing to read a long PDF or sit in front of a course.' },
-                    { type: 'normal', text: 'The approach has been replicated since—community-created content, professionally structured, distributed through existing social networks.' }
-                ],
-                choices: [
-                    { text: 'Complete Zimbabwe mission', action: 'mission2_complete' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'remote_collab'
-            },
-            
-            mission2_complete: {
-                location: 'zimbabwe',
-                narrative: [
-                    { type: 'success', text: '> MISSION COMPLETE: Zimbabwe Community Rights' },
-                    { type: 'normal', text: 'Communities now know their rights. When mining companies come, people ask questions, demand impact assessments, organize monitors. The balance of power has shifted—slightly, but meaningfully.' },
-                    { type: 'success', text: '+30 IMPACT POINTS | +1 TRUST LEVEL' },
-                    { type: 'normal', text: 'You think about the ripple effects. One community that successfully negotiates protections becomes a model for the next. The videos keep circulating, keep teaching, keep building capacity long after the project officially ended.' }
-                ],
-                choices: [
-                    { text: 'Accept Mission 3: Virtual Learning Crisis', action: 'mission3' },
-                    { text: 'Accept Mission 4: Global Scale Challenge', action: 'mission4' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'zimbabwe_complete'
-            },
-            
-            mission3: {
-                location: 'virtual',
-                narrative: [
-                    { type: 'system', text: '> MISSION BRIEFING: VIRTUAL LEARNING EMERGENCY' },
-                    { type: 'alert', text: 'YEAR: 2020 | STATUS: Global pandemic. All in-person training cancelled.' },
-                    { type: 'normal', text: 'The <span class="highlight">Natural Resource Crime Investigation</span> course was supposed to be two weeks in a classroom. Law enforcement officers learning to investigate illegal logging, mining, arson. The capstone was a full-day simulation: surveillance, mock interviews, evidence gathering, building a prosecutable case.' },
-                    { type: 'normal', text: 'Now it needs to happen over Zoom. With limited budget. Under time pressure. The learning outcomes can\'t be compromised—these officers will face real criminals.' },
-                    { type: 'normal', text: 'Most people said it couldn\'t be done virtually. You got creative.' }
-                ],
-                choices: [
-                    { text: 'Design the virtual simulation', action: 'mission3_design' },
-                    { text: 'See the innovative delivery approach', action: 'mission3_delivery' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'nrc_overview'
-            },
-            
-            mission3_design: {
-                location: 'virtual',
-                narrative: [
-                    { type: 'normal', text: 'You broke the exercise into its core behaviors: interviewing, evidence collection, investigative planning. Then you rebuilt the experience inside a custom <span class="highlight">Articulate Storyline module</span>.' },
-                    { type: 'normal', text: 'But here\'s the twist: you didn\'t deliver it as a typical self-directed module. You used it <span class="highlight">live</span>.' },
-                    { type: 'success', text: 'In Zoom breakout rooms, small teams worked through the simulation together. One participant "drove" while the group collaborated in real time. The module paced and framed decision-making; the group context brought energy and realism.' },
-                    { type: 'normal', text: 'Each team presented their final case analysis to a virtual "prosecutor." The stakes felt real because the learning design made them real.' }
-                ],
-                choices: [
-                    { text: 'See the results', action: 'mission3_complete' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'nrc_design'
-            },
-            
-            mission3_delivery: {
-                location: 'virtual',
-                narrative: [
-                    { type: 'normal', text: 'The key insight: <span class="highlight">Rapid e-learning tools aren\'t just for click-through modules.</span>' },
-                    { type: 'normal', text: 'Storyline became the backbone of a live, collaborative experience. The tool paced the exercise, surfaced information at the right moments, tracked decisions—but the humans in breakout rooms did the thinking, debating, and deciding.' },
-                    { type: 'success', text: 'Participant feedback: <span class="highlight">"This is the best virtual classroom I\'ve ever been in."</span>' },
-                    { type: 'normal', text: 'The approach has been adapted since—hybrid simulations, live-facilitated e-learning, group problem-solving through structured digital environments. What started as pandemic adaptation became permanent innovation.' }
-                ],
-                choices: [
-                    { text: 'Complete Mission 3', action: 'mission3_complete' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'nrc_innovation'
-            },
-            
-            mission3_complete: {
-                location: 'virtual',
-                narrative: [
-                    { type: 'success', text: '> MISSION COMPLETE: Virtual Learning Crisis' },
-                    { type: 'normal', text: 'Officers returned to their regions equipped with skills they\'d practiced under pressure. Cases were built, evidence was gathered, prosecutions succeeded.' },
-                    { type: 'success', text: '+25 IMPACT POINTS | CAPABILITY UNLOCKED: "Hybrid Innovation"' },
-                    { type: 'normal', text: 'The pandemic proved something important: constraints can be catalysts. When you can\'t rely on familiar formats, you\'re forced to ask what really matters about the learning experience—and often, you find better answers.' }
-                ],
-                choices: [
-                    { text: 'Accept Mission 4: Global Scale Challenge', action: 'mission4' },
-                    { text: 'Review all capabilities before final mission', action: 'viewCapabilities' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'virtual_complete'
-            },
-            
-            mission4: {
-                location: 'imf',
-                narrative: [
-                    { type: 'system', text: '> FINAL MISSION: GLOBAL SCALE DEPLOYMENT' },
-                    { type: 'alert', text: 'CHALLENGE: Transform multi-day in-person training into scalable global learning' },
-                    { type: 'normal', text: 'USAID\'s Private Sector Engagement Hub had a problem: their 1-week in-person course on engaging private sector partners was reaching hundreds. They needed to reach thousands.' },
-                    { type: 'normal', text: 'The easy answer was to record the presentations and call it e-learning. But you knew that would fail. <span class="highlight">40 hours of next-button e-learning won\'t work.</span>' },
-                    { type: 'normal', text: 'You needed to rethink the entire learning architecture.' }
-                ],
-                choices: [
-                    { text: 'Design the cohort-based system', action: 'mission4_design' },
-                    { text: 'See the multi-modal approach', action: 'mission4_tools' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'pse_overview'
-            },
-            
-            mission4_design: {
-                location: 'imf',
-                narrative: [
-                    { type: 'normal', text: 'You created a <span class="highlight">33-module virtual curriculum</span> that wasn\'t just a course—it was a system.' },
-                    { type: 'normal', text: 'Cohort-based learning: participants moved through together, creating accountability and peer connection. Virtual spaces for sharing lessons. User-generated maps showing where people were applying concepts. Microlearning content for busy schedules. Videos and animations for complex concepts. Scenario-based learning for decision practice.' },
-                    { type: 'success', text: 'The LMS was used in innovative ways—not just as content delivery, but as community platform, reflection space, and progress tracker.' },
-                    { type: 'normal', text: 'Key Lesson: <span class="highlight">Multi-day in-person learning CAN be translated into impactful asynchronous experiences</span>—but only when designed intentionally, organized well from the start, and when they bring in a range of different tools.' }
-                ],
-                choices: [
-                    { text: 'Complete final mission', action: 'ending' },
-                    { text: 'See the multi-modal toolkit', action: 'mission4_tools' }
-                ],
-                discover: 'pse_design'
-            },
-            
-            mission4_tools: {
-                location: 'imf',
-                narrative: [
-                    { type: 'normal', text: 'Your toolkit for this mission included:' },
-                    { type: 'success', text: '• <span class="skill-tag">Articulate 360</span> for interactive modules<br>• <span class="skill-tag">Adobe Premiere/After Effects</span> for video production<br>• <span class="skill-tag">LMS innovation</span> for community features<br>• <span class="skill-tag">Cohort architecture</span> for peer learning<br>• <span class="skill-tag">Scenario design</span> for application practice' },
-                    { type: 'normal', text: 'But tools are just tools. The real work was <span class="highlight">understanding what the in-person experience actually accomplished</span>—and finding new ways to achieve those same outcomes at scale.' },
-                    { type: 'normal', text: 'Thousands of USAID staff around the world now have access to learning that used to require a flight to Washington.' }
-                ],
-                choices: [
-                    { text: 'Complete final mission', action: 'ending' },
-                    { text: 'Return to hub', action: 'intro' }
-                ],
-                discover: 'pse_tools'
-            },
-            
-            ending: {
-                location: 'ending',
-                narrative: [
-                    { type: 'system', text: '> SIMULATION COMPLETE' },
-                    { type: 'success', text: '════════════════════════════════════════' },
-                    { type: 'normal', text: 'The year is 2047. Or maybe it\'s today. The work is the same.' },
-                    { type: 'normal', text: '<span class="highlight">Kirby Crider</span> designs learning systems that help people and organizations adapt faster than their challenges evolve.' },
-                    { type: 'normal', text: 'From Montana forests to Zimbabwean villages. From pandemic Zoom rooms to global LMS deployments. From AI-driven chatbots to intimate in-person seminars with participants from 20 countries.' },
-                    { type: 'success', text: 'The thread that connects it all: <span class="highlight">Systems that build capacity at scale.</span>' },
-                    { type: 'normal', text: 'Whether the context is climate adaptation, public health, natural resource protection, private sector engagement, or organizational transformation—the core work remains: helping people learn what they need to learn, when they need to learn it, in ways that actually change what they do.' },
-                    { type: 'alert', text: '▸ Ready to discuss how these capabilities might serve your organization?' }
-                ],
-                choices: [
-                    { text: '📧 Send Email: kirby.crider@gmail.com', action: 'contact_email' },
-                    { text: '📞 Call: 919-357-1797', action: 'contact_phone' },
-                    { text: '💼 View LinkedIn Profile', action: 'contact_linkedin' },
-                    { text: '🌐 Explore Full Portfolio', action: 'contact_portfolio' },
-                    { text: 'Replay the simulation', action: 'intro' }
-                ],
-                discover: 'ending_complete'
-            }
-        };
-        
-        // Inventory items
-        const inventoryItems = {
-            core_capabilities: '• Learning Strategy & Design',
-            ai_learning: '• AI Learning Architecture',
-            current_work: '• Active Consulting Practice',
-            career_history: '• 15+ Years Experience',
-            trg_leadership: '• Board-Level Leadership',
-            portfolio_overview: '• Multi-Modal Portfolio',
-            ispam_overview: '• International Facilitation',
-            blue_mountain: '• Virtual Site Visits',
-            facilitation_deep: '• Psychological Safety Design',
-            montana_complete: '• Protected Area Expertise',
-            zimbabwe_context: '• Community Rights Work',
-            zela_videos: '• Multilingual Video Production',
-            remote_collab: '• Remote Collaboration',
-            zimbabwe_complete: '• Environmental Justice',
-            nrc_overview: '• Crisis Adaptation',
-            nrc_design: '• Simulation Design',
-            nrc_innovation: '• Hybrid Innovation',
-            virtual_complete: '• Virtual Classroom Mastery',
-            pse_overview: '• Scale Transformation',
-            pse_design: '• Cohort-Based Learning',
-            pse_tools: '• Multi-Modal Toolkit',
-            ending_complete: '• Full Portfolio Review'
-        };
-        
-        // DOM Elements
-        let narrativePanel, choicesContainer, asciiDisplay, inventoryList, missionLog;
-        let discoveryBar, discoveryPct, currentLocationEl, trustLevelEl, impactScoreEl;
-        
-        // Initialize game
-        function initGame() {
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
-            
-            narrativePanel = document.getElementById('narrative-panel');
-            choicesContainer = document.getElementById('choices-container');
-            asciiDisplay = document.getElementById('ascii-display');
-            inventoryList = document.getElementById('inventory-list');
-            missionLog = document.getElementById('mission-log');
-            discoveryBar = document.getElementById('discovery-bar');
-            discoveryPct = document.getElementById('discovery-pct');
-            currentLocationEl = document.getElementById('current-location');
-            trustLevelEl = document.getElementById('trust-level');
-            impactScoreEl = document.getElementById('impact-score');
-            
-            loadNode('intro');
+        function showCharSelect() {
+            document.getElementById('title-screen').style.display = 'none';
+            document.getElementById('char-select').classList.add('active');
         }
-        
-        // Load a story node
-        function loadNode(nodeId) {
-            const node = storyNodes[nodeId];
-            if (!node) return;
-            
-            // Update location
-            gameState.location = node.location;
-            updateLocationDisplay();
-            
-            // Update ASCII art
-            asciiDisplay.textContent = asciiArt[node.location] || asciiArt.hub;
-            
-            // Clear and populate narrative
-            narrativePanel.innerHTML = '';
-            node.narrative.forEach((item, index) => {
-                setTimeout(() => {
-                    addNarrativeText(item.text, item.type);
-                }, index * 300);
+
+        function backToTitle() {
+            document.getElementById('char-select').classList.remove('active');
+            document.getElementById('title-screen').style.display = 'flex';
+        }
+
+        function startGame() {
+            document.getElementById('title-screen').style.display = 'none';
+            document.getElementById('char-select').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            goToScene('hub');
+        }
+
+        function goToScene(sceneId) {
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
             });
-            
-            // Handle discovery
-            if (node.discover && !gameState.discovered.has(node.discover)) {
-                gameState.discovered.add(node.discover);
-                gameState.inventory.push(inventoryItems[node.discover]);
-                updateInventory();
-                updateProgress();
-                showAchievement(inventoryItems[node.discover]);
-                
-                // Update impact for completed missions
-                if (node.discover.includes('complete')) {
-                    gameState.impact += 25;
-                    gameState.trust = Math.min(5, gameState.trust + 1);
-                    updateStats();
-                }
+
+            const targetScene = document.getElementById('scene-' + sceneId);
+            if (targetScene) {
+                targetScene.classList.add('active');
             }
-            
-            // Load choices after narrative
-            setTimeout(() => {
-                loadChoices(node.choices);
-            }, node.narrative.length * 300 + 200);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        
-        // Add narrative text with typing effect
-        function addNarrativeText(text, type = 'normal') {
-            const p = document.createElement('p');
-            p.className = `narrative-text ${type}`;
-            p.innerHTML = text;
-            narrativePanel.appendChild(p);
-            narrativePanel.scrollTop = narrativePanel.scrollHeight;
-        }
-        
-        // Load choices
-        function loadChoices(choices) {
-            choicesContainer.innerHTML = '';
-            choices.forEach((choice, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'choice-btn';
-                btn.innerHTML = `<span class="key">${index + 1}</span>${choice.text}`;
-                btn.onclick = () => handleChoice(choice.action);
-                choicesContainer.appendChild(btn);
-            });
-        }
-        
-        // Handle choice selection
-        function handleChoice(action) {
-            // Handle contact actions
-            if (action === 'contact_email') {
-                window.open('mailto:kirby.crider@gmail.com', '_blank');
-                return;
-            }
-            if (action === 'contact_phone') {
-                window.open('tel:919-357-1797', '_blank');
-                return;
-            }
-            if (action === 'contact_linkedin') {
-                window.open('https://linkedin.com/in/kirbycrider', '_blank');
-                return;
-            }
-            if (action === 'contact_portfolio') {
-                window.open('https://kirbyc.carrd.co', '_blank');
-                return;
-            }
-            
-            // Add to mission log
-            const timestamp = `[${String(Math.floor(Math.random() * 24)).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}]`;
-            gameState.missionLog.unshift(`${timestamp} → ${action.replace(/_/g, ' ')}`);
-            updateMissionLog();
-            
-            // Load next node
-            loadNode(action);
-        }
-        
-        // Update displays
-        function updateLocationDisplay() {
-            const locations = {
-                hub: 'Charlottesville Hub',
-                montana: 'Montana Bioregion',
-                zimbabwe: 'Zimbabwe Network',
-                virtual: 'Virtual Matrix',
-                imf: 'Global Institute',
-                ending: 'Network Complete'
-            };
-            currentLocationEl.textContent = locations[gameState.location] || 'Unknown';
-        }
-        
-        function updateInventory() {
-            inventoryList.innerHTML = gameState.inventory.map(item => 
-                `<div class="inventory-item">${item}</div>`
-            ).join('');
-        }
-        
-        function updateMissionLog() {
-            missionLog.innerHTML = gameState.missionLog.slice(0, 5).map(entry =>
-                `<div style="font-size: 0.75rem; margin-bottom: 5px; color: var(--amber);">${entry}</div>`
-            ).join('');
-        }
-        
-        function updateProgress() {
-            const pct = Math.round((gameState.discovered.size / gameState.totalDiscoverable) * 100);
-            discoveryPct.textContent = pct;
-            discoveryBar.style.width = `${pct}%`;
-        }
-        
-        function updateStats() {
-            const trustSymbols = '●'.repeat(gameState.trust) + '○'.repeat(5 - gameState.trust);
-            trustLevelEl.textContent = trustSymbols;
-            impactScoreEl.textContent = gameState.impact;
-        }
-        
-        // Achievement popup
-        function showAchievement(text) {
-            const ach = document.getElementById('achievement');
-            document.getElementById('ach-text').textContent = text;
-            ach.classList.add('show');
-            setTimeout(() => ach.classList.remove('show'), 3000);
-        }
-        
-        // Modal functions
-        function showModal(title, body) {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-body').innerHTML = body;
-            document.getElementById('modal-overlay').style.display = 'flex';
-        }
-        
-        function closeModal() {
-            document.getElementById('modal-overlay').style.display = 'none';
-        }
-        
+
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
-            if (e.key >= '1' && e.key <= '9') {
-                const index = parseInt(e.key) - 1;
-                const buttons = choicesContainer.querySelectorAll('.choice-btn');
-                if (buttons[index]) {
-                    buttons[index].click();
+            if (e.key === 'Enter' || e.key === ' ') {
+                const titleScreen = document.getElementById('title-screen');
+                if (titleScreen.style.display !== 'none') {
+                    showCharSelect();
                 }
             }
+            if (e.key === 'Escape') {
+                goToScene('hub');
+            }
+            if (e.key === 'i' || e.key === 'I') {
+                // Could add inventory modal here
+                alert('📦 INVENTORY\n\n⚔️ Equipped: Backward Design\n🛡️ Equipped: Systems Thinking\n📜 Quests Complete: 9\n⭐ Level: 15');
+            }
         });
-        
-        // Start button
-        document.getElementById('start-btn').addEventListener('click', initGame);
+
+        // Menu option hover effects
+        document.querySelectorAll('.menu-option').forEach(option => {
+            option.addEventListener('mouseenter', function() {
+                document.querySelectorAll('.menu-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
     </script>
 </body>
 </html>
